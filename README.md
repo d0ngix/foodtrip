@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 # Slim Framework
 
 [![Build Status](https://travis-ci.org/slimphp/Slim.svg?branch=develop)](https://travis-ci.org/slimphp/Slim)
@@ -82,3 +83,9 @@ If you discover security related issues, please email security@slimframework.com
 ## License
 
 The Slim Framework is licensed under the MIT license. See [License File](LICENSE.md) for more information.
+=======
+# foodtrip
+order food online
+
+Whoala! here come's the most awesome platform to order food at your fingertips.
+>>>>>>> 80daa00643ef02f5c064222d6c21416504529307
