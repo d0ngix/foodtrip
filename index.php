@@ -66,6 +66,10 @@ $container['db'] = function ($c) {
 $app->add(function (ServerRequestInterface $request, ResponseInterface $response, callable $next) {
 	// Use the PSR 7 $request object
 	
+	//Logging Here
+	$this->logger->addInfo("This is an INFO Log");
+	//var_dump($request->getQueryParams());die;
+	
 	return $next($request, $response);
 });
 /** *******************************************************************
@@ -80,11 +84,14 @@ $app->add(function (ServerRequestInterface $request, ResponseInterface $response
  * argument for `Slim::get`, `Slim::post`, `Slim::put`, `Slim::patch`, and `Slim::delete`
  * is an anonymous function.
  ***********************************************************************/
+//API - index
 $app->get('/', function ($request, $response, $args) {
     $response->write("Welcome to Slim!");    
     return $response;
 });
 
+
+//API - hello
 $app->get('/hello[/{name}]', function ($request, $response, $args) {
 	$arrResponse = array('lname' => 'Johannes', 'lname' => 'Mabulay');
 	
@@ -103,13 +110,9 @@ $app->get('/hello[/{name}]', function ($request, $response, $args) {
     
 })->setArgument('name', 'World!');
 
-$app->get('/users[/{varName}]', function ($request, $response, $args) {
 
-	//Calling UserController and passing db connections
-	$objUserController = new UserController($this->db);
-	$objUserController->users($args['varName']);
-	
-});
+//API - users
+require 'app/routes/user.php';
 
 
 

@@ -14,8 +14,8 @@ class UserController {
 		$stmt = $selectUserStatement->execute();
 		$data = $stmt->fetch();
 		
-		var_dump($data);
-		die("Class: ". __CLASS__);
+		return $data;
+		//die("Class: ". __CLASS__);
 		
 	} 
 } 
