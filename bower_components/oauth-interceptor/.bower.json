@@ -1,0 +1,27 @@
+{
+  "name": "oauth-interceptor",
+  "main": [
+    "./intercept/communication.js"
+  ],
+  "description": "A transparent, configurable, OAuth interceptor for AngularJS",
+  "dependencies": {
+    "angular": "1.x",
+    "angular-localforage": "latest"
+  },
+  "devDependencies": {
+    "jquery": "~2.1.0",
+    "angular-mocks": "~1.3.0",
+    "angular-scenario": "~1.3.0"
+  },
+  "homepage": "https://github.com/cotag/oauth-interceptor",
+  "version": "3.0.2",
+  "_release": "3.0.2",
+  "_resolution": {
+    "type": "version",
+    "tag": "v3.0.2",
+    "commit": "f770fe952136a40c6437ee9e470c18171f49c79f"
+  },
+  "_source": "https://github.com/cotag/oauth-interceptor.git",
+  "_target": "*",
+  "_originalSource": "oauth-interceptor"
+}

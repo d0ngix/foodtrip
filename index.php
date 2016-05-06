@@ -102,10 +102,12 @@ $app->get('/hello[/{name}]', function ($request, $response, $args) {
     	);    
        
     //Sampler logs
+    /*
     $this->logger->addInfo("This is an INFO Log");
     $this->logger->addError("This is an ERROR Log");
     $this->logger->addWarning("This is a WARNING log!!!");
-    
+    */
+     
     return $response;
     
 })->setArgument('name', 'World!');
@@ -113,6 +115,9 @@ $app->get('/hello[/{name}]', function ($request, $response, $args) {
 
 //API - users
 require 'app/routes/user.php';
+
+//API - addresses
+require 'app/routes/address.php';
 
 
 
