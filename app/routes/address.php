@@ -2,9 +2,9 @@
 //use Model\User;
 //use Controller\UserController;
 
-$app->get('/address[/{id}]', function ( $request, $response, $args) {
+$app->get('/address[/{uuid}]', function ( $request, $response, $args) {
 
-	$selectUserStatement = $this->db->select()->from('addresses')->where('id','=',$args['id']);
+	$selectUserStatement = $this->db->select()->from('addresses')->where('user_uuid','=',$args['uuid']);
 	$stmt = $selectUserStatement->execute(false);
 	$data = $stmt->fetch();
 	$response->withStatus(200);
@@ -15,12 +15,14 @@ $app->get('/address[/{id}]', function ( $request, $response, $args) {
 $app->post('/address[/{uuid}]', function ( $request, $response, $args) {
 
 	$data = $request->getParsedBody();
-	
+
 	//check for data, return false if empty
 	if ( empty($data) ) {
 		$response->withJson('Empty form!',500);
 		return $response;
 	}
+	
+	var_dump($this->checkUser($args['uuid']));die;
 	
 	//check if uuid for valid user
 	$isUserExist = $this->db->select(array('count(id) "count"'))->from('users')->where('uuid','=',$args['uuid']);
@@ -29,26 +31,31 @@ $app->post('/address[/{uuid}]', function ( $request, $response, $args) {
 		$response->withJson('Invalid User!',500);
 		return $response;		
 	}
-		
-	//search email and number if it exist
-	$isExist = $this->db->select(array('email'))->from('addresses')->where('email','=',$data['email']);
-	$isExist = $isExist->execute(false);
 	
-	if (!empty($isExist->fetch())) {
-		$response->withJson('User already exist!',500);
-		return $response;		
-	}
-
+	$data['user_uuid'] = $args['uuid'];
+	$data['created'] = date('Y-m-d h:i:s');
+	
 	$arrFields = array_keys($data);
 	$arrValues = array_values($data);
 
-	// INSERT INTO users ( id , usr , pwd ) VALUES ( ? , ? , ? )
-	$insertStatement = $this->db->insert( $arrFields )
-								->into('users')
+	try {
+		// INSERT INTO address ( id , usr , pwd ) VALUES ( ? , ? , ? )
+		$insertStatement = $this->db->insert( $arrFields )
+								->into('addresses')
 								->values($arrValues);
+
+		$insertId = $insertStatement->execute(true);
+		$response->withJson($insertId, 200);
+				
+	} catch (PDOException $e) {
+		
+		$response->withJson($e->getMessage(), 404);
+		
+	}
+
 	
-	$insertId = $insertStatement->execute(true);	
-	$response->withJson($insertId,200);
+		
+	//$response->withJson($insertId,200);
 	
 });
 

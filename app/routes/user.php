@@ -2,6 +2,21 @@
 //use Model\User;
 //use Controller\UserController;
 
+//Injecting checkUser to the Container
+$container['checkUser'] = function ($c) {
+	
+	
+	return function ($strUuid){
+		//check if uuid for valid user
+		$isUserExist = $this->db->select(array('count(id) "count"'))->from('users')->where('uuid','=',$strUuid);
+		$isUserExist = $isUserExist->execute()->fetch();
+		if (!$isUserExist['count'])
+			return false;	
+
+		return true;
+	};
+};
+
 $app->get('/user[/{uuid}]', function ( $request, $response, $args) {
 	$selectUserStatement = $this->db->select()->from('users')->where('uuid','=',$args['uuid']);
 	$stmt = $selectUserStatement->execute(false);

@@ -46,6 +46,7 @@ $container['logger'] = function ($c) {
 	$logger->pushHandler($file_handler);
 	return $logger;
 };
+
 //Adding Database connection to Container
 $container['db'] = function ($c) {	
 	$dsn = 'mysql:host=localhost;dbname=foodtrip;charset=utf8';
