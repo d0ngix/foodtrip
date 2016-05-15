@@ -4,7 +4,9 @@ use Psr\Http\Message\ResponseInterface;
 
 
 use Model\User;
-use Controller\UserController;
+//use Controller\UserController;
+use Utilities\UserUtil;
+
 /*
 $objUserCtrl = new UserController();
 $objUser = new User();
@@ -57,6 +59,12 @@ $container['db'] = function ($c) {
 	$pdo->setAttribute(PDO::ATTR_DEFAULT_FETCH_MODE, PDO::FETCH_ASSOC);	
 	return $pdo;
 };
+
+//Inject User Utility Class
+$container['UserUtil'] = function ($c) {
+	$utilities = new UserUtil();
+	return $utilities;
+};
 /** *******************************************************************
  * Dependecy Injection Container (DIC) - END
  **********************************************************************/
@@ -69,7 +77,7 @@ $app->add(function (ServerRequestInterface $request, ResponseInterface $response
 	
 	//Logging Here
 	$this->logger->addInfo("This is an INFO Log");
-	//var_dump($request->getQueryParams());die;
+	//var_dump($request->getQueryParams());die;	
 	
 	return $next($request, $response);
 });

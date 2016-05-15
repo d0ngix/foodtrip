@@ -2,21 +2,6 @@
 //use Model\User;
 //use Controller\UserController;
 
-//Injecting checkUser to the Container
-$container['checkUser'] = function ($c) {
-	
-	
-	return function ($strUuid){
-		//check if uuid for valid user
-		$isUserExist = $this->db->select(array('count(id) "count"'))->from('users')->where('uuid','=',$strUuid);
-		$isUserExist = $isUserExist->execute()->fetch();
-		if (!$isUserExist['count'])
-			return false;	
-
-		return true;
-	};
-};
-
 $app->get('/user[/{uuid}]', function ( $request, $response, $args) {
 	$selectUserStatement = $this->db->select()->from('users')->where('uuid','=',$args['uuid']);
 	$stmt = $selectUserStatement->execute(false);
@@ -84,6 +69,9 @@ $app->put('/user[/{uuid}]', function ( $request, $response, $args) {
 	
 	$data = $request->getParsedBody();
 	
+	$files = $request->getUploadedFiles();
+	var_dump($files);die;
+		
 	//check for data, return false if empty
 	if (empty($data)) {
 		//$response->setStatus(500);
@@ -91,7 +79,6 @@ $app->put('/user[/{uuid}]', function ( $request, $response, $args) {
 		return false;
 	}
 	
-	//search email and number if it exist
 	$isExist = $this->db->select()->from('users')->where('uuid' , '=' , $args['uuid']);
 	$isExist = $isExist->execute(false);
 	

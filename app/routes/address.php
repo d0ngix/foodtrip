@@ -22,14 +22,11 @@ $app->post('/address[/{uuid}]', function ( $request, $response, $args) {
 		return $response;
 	}
 	
-	var_dump($this->checkUser($args['uuid']));die;
-	
-	//check if uuid for valid user
-	$isUserExist = $this->db->select(array('count(id) "count"'))->from('users')->where('uuid','=',$args['uuid']);
-	$isUserExist = $isUserExist->execute()->fetch();
-	if (!$isUserExist['count']) {
+	//check user if valid
+	$blnValidUser = $this->UserUtil->checkUser($this->db, $args['uuid']);
+	if ( !$blnValidUser ) {
 		$response->withJson('Invalid User!',500);
-		return $response;		
+		return $response;
 	}
 	
 	$data['user_uuid'] = $args['uuid'];
@@ -52,10 +49,6 @@ $app->post('/address[/{uuid}]', function ( $request, $response, $args) {
 		$response->withJson($e->getMessage(), 404);
 		
 	}
-
-	
-		
-	//$response->withJson($insertId,200);
 	
 });
 
@@ -70,22 +63,56 @@ $app->put('/address[/{id}]', function ( $request, $response, $args) {
 		return false;
 	}
 	
-	//search email and number if it exist
-	$isExist = $this->db->select()->from('users')->where('id' , '=' , $args['id']);
-	$isExist = $isExist->execute(false);
-	
-	if (empty($isExist->fetch())){
-		$response->withJson('User Not Found!',500);
-		return false;
-	}
+	//check user if valid
+	$blnValidUser = $this->UserUtil->checkUser($this->db, $data['user_uuid']);
+	if ( !$blnValidUser ) {
+		$response->withJson('Invalid User!',500);
+		return $response;
+	}	
 	
 	// UPDATE users SET pwd = ? WHERE id = ?
 	$updateStatement = $this->db->update( $data )
-	                           ->table('users')
+	                           ->table('addresses')
 	                           ->where('id', '=', $args['id']);
 		
 	
 	$insertId = $updateStatement->execute(true);
 	$response->withJson($insertId,200);
 		
+});
+
+$app->delete('/address[/{id}]', function ( $request, $response, $args) {
+
+	$data = $request->getParsedBody();
+
+	//check for data, return false if empty
+	if (empty($data)) {
+		//$response->setStatus(500);
+		$response->withJson('Empty form!',500);
+		return false;
+	}
+
+	//check user if valid
+	$blnValidUser = $this->UserUtil->checkUser($this->db, $data['user_uuid']);
+	if ( !$blnValidUser ) {
+		$response->withJson('Invalid User!',500);
+		return $response;
+	}
+
+	try {
+		// DELETE FROM users WHERE id = ?
+		$deleteStatement = $this->db->delete()
+		                           	->from('addresses')
+		                           	->where('id', '=', $args['id']);
+		
+		$affectedRows = $deleteStatement->execute();
+	
+		$response->withJson($affectedRows,200);
+	
+	} catch (PDOException $e) {
+	
+		$response->withJson($e->getMessage(), 404);
+	
+	}
+
 });

@@ -44,7 +44,8 @@
         "psr-4": {
             "Slim\\": "Slim",
             "Model\\" : "app/Model",
-            "Controller\\" : "app/Controller"
+            "Controller\\" : "app/Controller",
+            "Utilities\\" : "app/Utilities"
         }
     },
     "scripts": {
