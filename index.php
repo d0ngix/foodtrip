@@ -3,9 +3,8 @@ use Psr\Http\Message\ServerRequestInterface;
 use Psr\Http\Message\ResponseInterface;
 
 
-use Model\User;
+//use Model\User;
 //use Controller\UserController;
-use Utilities\UserUtil;
 
 /*
 $objUserCtrl = new UserController();
@@ -61,9 +60,17 @@ $container['db'] = function ($c) {
 };
 
 //Inject User Utility Class
+use Utilities\UserUtil;
 $container['UserUtil'] = function ($c) {
-	$utilities = new UserUtil();
+	$utilities = new UserUtil($c->db);
 	return $utilities;
+};
+
+// //Inject User Upload Class
+use Utilities\UploadUtil;
+$container['UploadUtil'] = function ($c) {
+	$objUtil = new UploadUtil($c->db);
+	return $objUtil;
 };
 /** *******************************************************************
  * Dependecy Injection Container (DIC) - END
@@ -76,7 +83,12 @@ $app->add(function (ServerRequestInterface $request, ResponseInterface $response
 	// Use the PSR 7 $request object
 	
 	//Logging Here
-	$this->logger->addInfo("This is an INFO Log");
+    //Sampler logs
+    /*
+    $this->logger->addInfo("This is an INFO Log");
+    $this->logger->addError("This is an ERROR Log");
+    $this->logger->addWarning("This is a WARNING log!!!");
+    */
 	//var_dump($request->getQueryParams());die;	
 	
 	return $next($request, $response);
@@ -110,13 +122,6 @@ $app->get('/hello[/{name}]', function ($request, $response, $args) {
     			'application/json'
     	);    
        
-    //Sampler logs
-    /*
-    $this->logger->addInfo("This is an INFO Log");
-    $this->logger->addError("This is an ERROR Log");
-    $this->logger->addWarning("This is a WARNING log!!!");
-    */
-     
     return $response;
     
 })->setArgument('name', 'World!');
@@ -128,6 +133,21 @@ require 'app/routes/user.php';
 //API - addresses
 require 'app/routes/address.php';
 
+//API - menu
+require 'app/routes/menu.php';
+
+//API - uploads
+$app->post('/uploads[/{type}]', function ($request, $response, $args) {
+
+	$blnValidUser = $this->UploadUtil->upload($args, $request);
+	if ( $blnValidUser !== true ) {
+		$response->withJson($blnValidUser ,500);
+		return $response;		
+	}
+
+	return $response->withJson($blnValidUser,200);
+
+});
 
 
 /** *******************************************************************

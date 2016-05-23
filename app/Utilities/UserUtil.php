@@ -7,22 +7,34 @@ class UserUtil
 	public function __construct( $db = null ) {
 		
 		$this->db = $db;
-	
+			
 	}	
 
 	//check if uuid for valid user
-	public static function checkUser ($db, $strUuid) {
-
-		$isUserExist = $db->select(array('count(id) "count"'))->from('users')->where('uuid','=',$strUuid);
+	public function checkUser ($strUuid) {
+		
+		$isUserExist = $this->db->select(array('count(id) "count"'))->from('users')->where('uuid','=',$strUuid);
 		$isUserExist = $isUserExist->execute()->fetch();
 
 		if (!$isUserExist['count'])
-			return false;
+			return "Invalid User!";
 		
 		return true;
 	
 	}
 	
+	//check if uuid for valid vendor
+	public function checkVendor ($strUuid) {
+	
+		$pdoObject = $this->db->select(array('id'))->from('vendors')->where('uuid','=',$strUuid);
+		$pdoObject = $pdoObject->execute()->fetch();
+
+		if (!$pdoObject['id'])
+			return "Invalid Vendor!";
+	
+		return (int)$pdoObject['id'];
+		
+	}
 
 		
 }

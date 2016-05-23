@@ -12,8 +12,8 @@ $app->get('/user[/{uuid}]', function ( $request, $response, $args) {
 });
 
 //Adding new user
-$app->post('/user/', function ( $request, $response, $args) {
-
+$app->post('/user', function ( $request, $response, $args) {
+	
 	$data = $request->getParsedBody();
 	
 	//check for data, return false if empty
@@ -66,26 +66,22 @@ $app->post('/user/', function ( $request, $response, $args) {
 });
 
 $app->put('/user[/{uuid}]', function ( $request, $response, $args) {
-	
+
 	$data = $request->getParsedBody();
-	
-	$files = $request->getUploadedFiles();
-	var_dump($files);die;
-		
+			
 	//check for data, return false if empty
 	if (empty($data)) {
 		//$response->setStatus(500);
 		$response->withJson('Empty form!',500);
 		return false;
 	}
-	
-	$isExist = $this->db->select()->from('users')->where('uuid' , '=' , $args['uuid']);
-	$isExist = $isExist->execute(false);
-	
-	if (empty($isExist->fetch())){
-		$response->withJson('User Not Found!',500);
-		return false;
-	}
+
+	//check user if valid
+	$blnValidUser = $this->UserUtil->checkUser($args['uuid']);
+	if ( $blnValidUser !== true) {
+		$response->withJson($blnValidUser ,500);
+		return $response;
+	}	
 	
 	//password hashing
 	if (!empty($data['password'])) {

@@ -4,9 +4,16 @@
 
 $app->get('/address[/{uuid}]', function ( $request, $response, $args) {
 
+	//check user if valid
+	$blnValidUser = $this->UserUtil->checkUser($args['uuid']);
+	if ( $blnValidUser !== true) {
+		$response->withJson($blnValidUser ,500);
+		return $response;
+	}
+	
 	$selectUserStatement = $this->db->select()->from('addresses')->where('user_uuid','=',$args['uuid']);
 	$stmt = $selectUserStatement->execute(false);
-	$data = $stmt->fetch();
+	$data = $stmt->fetchAll();
 	$response->withStatus(200);
 	$response->withJson($data);
 
@@ -23,9 +30,9 @@ $app->post('/address[/{uuid}]', function ( $request, $response, $args) {
 	}
 	
 	//check user if valid
-	$blnValidUser = $this->UserUtil->checkUser($this->db, $args['uuid']);
-	if ( !$blnValidUser ) {
-		$response->withJson('Invalid User!',500);
+	$blnValidUser = $this->UserUtil->checkUser($args['uuid']);
+	if ( $blnValidUser !== true) {
+		$response->withJson($blnValidUser ,500);
 		return $response;
 	}
 	
