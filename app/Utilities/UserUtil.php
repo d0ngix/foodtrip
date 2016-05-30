@@ -13,13 +13,12 @@ class UserUtil
 	//check if uuid for valid user
 	public function checkUser ($strUuid) {
 		
-		$isUserExist = $this->db->select(array('count(id) "count"'))->from('users')->where('uuid','=',$strUuid);
+		$isUserExist = $this->db->select(array('id'))->from('users')->where('uuid','=',$strUuid);
 		$isUserExist = $isUserExist->execute()->fetch();
 
-		if (!$isUserExist['count'])
-			return "Invalid User!";
+		if (!$isUserExist) return false;
 		
-		return true;
+		return $isUserExist['id'];
 	
 	}
 	

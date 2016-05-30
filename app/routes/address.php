@@ -5,9 +5,9 @@
 $app->get('/address[/{uuid}]', function ( $request, $response, $args) {
 
 	//check user if valid
-	$blnValidUser = $this->UserUtil->checkUser($args['uuid']);
-	if ( $blnValidUser !== true) {
-		$response->withJson($blnValidUser ,500);
+	$userId = $this->UserUtil->checkUser($args['uuid']);
+	if ( ! $userId ) {
+		$response->withJson("Invalid User" ,500);
 		return $response;
 	}
 	
@@ -30,9 +30,9 @@ $app->post('/address[/{uuid}]', function ( $request, $response, $args) {
 	}
 	
 	//check user if valid
-	$blnValidUser = $this->UserUtil->checkUser($args['uuid']);
-	if ( $blnValidUser !== true) {
-		$response->withJson($blnValidUser ,500);
+	$userId = $this->UserUtil->checkUser($args['uuid']);
+	if ( ! $userId ) {
+		$response->withJson("Invalid User" ,500);
 		return $response;
 	}
 	
@@ -71,11 +71,11 @@ $app->put('/address[/{id}]', function ( $request, $response, $args) {
 	}
 	
 	//check user if valid
-	$blnValidUser = $this->UserUtil->checkUser($this->db, $data['user_uuid']);
-	if ( !$blnValidUser ) {
-		$response->withJson('Invalid User!',500);
+	$userId = $this->UserUtil->checkUser($data['user_uuid']);
+	if ( ! $userId ) {
+		$response->withJson("Invalid User" ,500);
 		return $response;
-	}	
+	}
 	
 	// UPDATE users SET pwd = ? WHERE id = ?
 	$updateStatement = $this->db->update( $data )

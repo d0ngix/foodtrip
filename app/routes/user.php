@@ -77,11 +77,11 @@ $app->put('/user[/{uuid}]', function ( $request, $response, $args) {
 	}
 
 	//check user if valid
-	$blnValidUser = $this->UserUtil->checkUser($args['uuid']);
-	if ( $blnValidUser !== true) {
-		$response->withJson($blnValidUser ,500);
+	$userId = $this->UserUtil->checkUser($args['uuid']);
+	if ( ! $userId ) {
+		$response->withJson("Invalid User" ,500);
 		return $response;
-	}	
+	}
 	
 	//password hashing
 	if (!empty($data['password'])) {

@@ -66,12 +66,20 @@ $container['UserUtil'] = function ($c) {
 	return $utilities;
 };
 
-// //Inject User Upload Class
+//Inject User Upload Class
 use Utilities\UploadUtil;
 $container['UploadUtil'] = function ($c) {
 	$objUtil = new UploadUtil($c->db);
 	return $objUtil;
 };
+
+//Inject MenuUtil Class
+use Utilities\MenuUtil;
+$container['MenuUtil'] = function ($c) {
+	$objUtil = new MenuUtil($c->db);
+	return $objUtil;
+};
+
 /** *******************************************************************
  * Dependecy Injection Container (DIC) - END
  **********************************************************************/

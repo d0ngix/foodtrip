@@ -1,5 +1,6 @@
 <?php
 
+//Add New Menu
 $app->post('/menu', function($request, $response, $args){
 	
 	$data = $request->getParsedBody();
@@ -45,7 +46,8 @@ $app->post('/menu', function($request, $response, $args){
 	
 });
 
-$app->get('/menu[/{vendor_uuid}]', function ($request, $response, $args) {
+//Get All Menu from Vendor
+$app->get('/menu/all/{vendor_uuid}', function ($request, $response, $args) {
 	
 	//check vendor if valid
 	$vendorId = $this->UserUtil->checkVendor($args['vendor_uuid']);
@@ -58,33 +60,17 @@ $app->get('/menu[/{vendor_uuid}]', function ($request, $response, $args) {
 		
 		$selectStatement = $this->db->select()->from('menus')->whereMany(array('vendor_id' => $vendorId, 'is_active' => 1), '=');
 		$stmt = $selectStatement->execute(false);
-		//var_dump($stmt->queryString);die;
 		$data = $stmt->fetchAll();
+		
 
-		foreach ($data as $value)
-			$id[] = $value['id'];
-
-		$selectStatement = $this->db->select(array("menu_id","path", "is_primary", "name"))->from('menu_images')->whereIn('menu_id', $id);
-		$stmt = $selectStatement->execute(false);
-		$dataImage = $stmt->fetchAll();
-	
-		if (!empty($dataImage)) {
-			foreach ($dataImage as $value) {
-				$newDateImage[$value['menu_id']][] = $value;
-			}
-			$dataImage = $newDateImage;
+		$ratings = $this->MenuUtil->getRatings($menuId);
+		
+		var_dump($arrData);
+		die;
 			
-			//var_dump($dataImage);die;
-			$counter = 0;
-			foreach ($data as $value) {
-				$newData[$counter] = $value;
-				if (!empty($dataImage[$value['id']]))  
-					$newData[$counter]['photo'] = $dataImage[$value['id']];
-				
-				$counter++;
-			}
-			$data = $newData;
-		}
+
+		if (!empty($data))
+			$data = $this->MenuUtil->getMenuImages($data);
 		
 		$response->withJson($data, 200);
 				
@@ -93,8 +79,72 @@ $app->get('/menu[/{vendor_uuid}]', function ($request, $response, $args) {
 		$response->withJson($e->getMessage(), 200);
 		
 	}
-
-	
-	
 		
+});
+
+
+//Get Single Menu from Vendor
+$app->get('/menu/{menu_id}', function ($request, $response, $args) {
+		
+	try {
+		
+		$selectStatement = $this->db->select()->from('menus')->where('id', '=', $args['menu_id']);
+		$stmt = $selectStatement->execute(false);		
+		$data = $stmt->fetchAll();
+		
+		if (!empty($data))
+			$data = $this->MenuUtil->getMenuImages($data);
+
+		$response->withJson($data, 200);
+		
+	} catch (Exception $e) {
+		
+		$response->withJson($e->getMessage(), 200);
+		
+	}
+	
+});
+
+//Rate a Menu w/ Comment
+$app->post('/menu/rate/{user_uuid}', function($request, $response, $args){
+	
+	$data = $request->getParsedBody();
+	
+	//check user if valid
+	$userId = $this->UserUtil->checkUser($args['user_uuid']);
+	if ( ! $userId ) {
+		$response->withJson("Invalid User" ,500);
+		return $response;
+	}
+	$data['user_id'] = $userId;
+	
+	$arrFields = array_keys($data);
+	$arrValues = array_values($data);
+	
+	try {
+		// INSERT INTO users ( id , usr , pwd ) VALUES ( ? , ? , ? )
+		$insertStatement = $this->db->insert( $arrFields )
+									->into('menu_ratings')
+									->values($arrValues);
+		$insertId = $insertStatement->execute(true);
+		
+		$ratings = $this->MenuUtil->getRatings($data['menu_id']);
+				
+		$data['ratings'] = $ratings;
+
+		$response->withJson($data, 200);
+		
+	} catch (Exception $e) {
+		
+		$response->withJson($e->getMessage(), 200);
+	}
+	
+});
+
+$app->get('/menu/rate/{menu_id}', function ($request, $response, $args) {
+	
+	$ratings = $this->MenuUtil->getRatings($args['menu_id']);
+	
+	$response->withJson($ratings, 200);
+	
 });
