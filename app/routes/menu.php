@@ -125,10 +125,13 @@ $app->post('/menu/rate/{user_uuid}', function($request, $response, $args){
 									->values($arrValues);
 		$insertId = $insertStatement->execute(true);
 		
-		$ratings = $this->MenuUtil->getRatings($data['menu_id']);
+		//retrieve the menu details
+		$selectStmt = $this->db->select()->from('menus')->where('id','=',$data['menu_id']);
+		$selectStmt = $selectStmt->execute(false);
+		$data = $selectStmt->fetchAll();
+		
+		$blnRatings = $this->MenuUtil->getRatings($data);
 				
-		$data['ratings'] = $ratings;
-
 		$response->withJson($data, 200);
 		
 	} catch (Exception $e) {
