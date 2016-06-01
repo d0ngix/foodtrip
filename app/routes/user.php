@@ -46,6 +46,8 @@ $app->post('/user', function ( $request, $response, $args) {
 		$passwordFromPost = $data['password'];
 		$data['password'] = password_hash($passwordFromPost, PASSWORD_BCRYPT, $options);		
 	}
+	
+	$data['uuid'] = uniqid();
 
 	$arrFields = array_keys($data);
 	$arrValues = array_values($data);
