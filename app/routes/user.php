@@ -6,6 +6,8 @@ $app->get('/user[/{uuid}]', function ( $request, $response, $args) {
 	$selectUserStatement = $this->db->select()->from('users')->where('uuid','=',$args['uuid']);
 	$stmt = $selectUserStatement->execute(false);
 	$data = $stmt->fetch();
+	//unjson the photo details
+	$data['photo'] = json_decode($data['photo'],true);
 
 	$response->withJson($data, 200);
 
