@@ -142,9 +142,14 @@ $app->post('/menu/rate/{user_uuid}', function($request, $response, $args){
 });
 
 $app->get('/menu/rate/{menu_id}', function ($request, $response, $args) {
+
+	//retrieve the menu details
+	$selectStmt = $this->db->select()->from('menus')->where('id','=',$args['menu_id']);
+	$selectStmt = $selectStmt->execute(false);
+	$data = $selectStmt->fetchAll();
 	
-	$ratings = $this->MenuUtil->getRatings($args['menu_id']);
+	$ratings = $this->MenuUtil->getRatings($data);
 	
-	$response->withJson($ratings, 200);
+	$response->withJson($data, 200);
 	
 });
