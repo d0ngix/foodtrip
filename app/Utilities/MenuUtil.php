@@ -41,7 +41,7 @@ class MenuUtil
 		return false;
 	}
 
-	public function getRatings ($data) {
+	public function getRatings (&$data) {
 		
 		if (empty($data)) return false;
 		
@@ -52,19 +52,19 @@ class MenuUtil
 			
 			$selectStmt = $this->db->select()->from('menu_ratings')->whereIn('menu_id', $menuId)->orderBy('menu_id','ASC');
 			$selectStmt = $selectStmt->execute();
-			$data = $selectStmt->fetchAll();
+			$dataRatings = $selectStmt->fetchAll();
 			
 			//return false if menu has no ratings 
-			if (empty($data)) return false;
+			if (empty($dataRatings)) return false;
 			
-			reset($data);
-			$firstKey = key($data);
-			end($data);
-			$lastKey = key($data);
+			reset($dataRatings);
+			$firstKey = key($dataRatings);
+			end($dataRatings);
+			$lastKey = key($dataRatings);
 
 			$prevMenuId = $intFive = $intFour = $intThree = $intTwo = $intOne = null;
 			
-			foreach ($data as $key => $value ) {
+			foreach ($dataRatings as $key => $value ) {
 				
 				extract($value);//extract = array('id' => 1) = $id = 1
 				
@@ -106,9 +106,10 @@ class MenuUtil
 			
 					$arrData[$key] = $value;
 				}
+				$data = $arrData;
 			}
 			
-			return $ratings;
+			return true;
 			
 			
 		} catch (Exception $e) {

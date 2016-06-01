@@ -62,13 +62,8 @@ $app->get('/menu/all/{vendor_uuid}', function ($request, $response, $args) {
 		$stmt = $selectStatement->execute(false);
 		$data = $stmt->fetchAll();
 		
-
-		$ratings = $this->MenuUtil->getRatings($menuId);
+		$blnRatings = $this->MenuUtil->getRatings($data);
 		
-		var_dump($arrData);
-		die;
-			
-
 		if (!empty($data))
 			$data = $this->MenuUtil->getMenuImages($data);
 		
@@ -92,6 +87,8 @@ $app->get('/menu/{menu_id}', function ($request, $response, $args) {
 		$stmt = $selectStatement->execute(false);		
 		$data = $stmt->fetchAll();
 		
+		$blnRatings = $this->MenuUtil->getRatings($data);
+
 		if (!empty($data))
 			$data = $this->MenuUtil->getMenuImages($data);
 
