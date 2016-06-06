@@ -50,9 +50,9 @@ $container['logger'] = function ($c) {
 
 //Adding Database connection to Container
 $container['db'] = function ($c) {	
-	$dsn = 'mysql:host=us-cdbr-iron-east-04.cleardb.net;dbname=heroku_9d2a1cfa6f2cfa2;charset=utf8';
-	$usr = 'b7bed7fbfec968';
-	$pwd = '79de4384';	
+	$dsn = 'mysql:host=localhost;dbname=foodtrip;charset=utf8';
+	$usr = 'root';
+	$pwd = '';	
 	$pdo = new \Slim\PDO\Database($dsn, $usr, $pwd);	
 	$pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
 	$pdo->setAttribute(PDO::ATTR_DEFAULT_FETCH_MODE, PDO::FETCH_ASSOC);	
@@ -77,6 +77,13 @@ $container['UploadUtil'] = function ($c) {
 use Utilities\MenuUtil;
 $container['MenuUtil'] = function ($c) {
 	$objUtil = new MenuUtil($c->db);
+	return $objUtil;
+};
+
+//Inject TransacUtil Class
+use Utilities\TransacUtil;
+$container['TransacUtil'] = function ($c) {
+	$objUtil = new TransacUtil($c->db);
 	return $objUtil;
 };
 
@@ -135,14 +142,17 @@ $app->get('/hello[/{name}]', function ($request, $response, $args) {
 })->setArgument('name', 'World!');
 
 
-//API - users
+//API - user
 require 'app/routes/user.php';
 
-//API - addresses
+//API - address
 require 'app/routes/address.php';
 
 //API - menu
 require 'app/routes/menu.php';
+
+//API - transac
+require 'app/routes/transac.php';
 
 //API - uploads
 $app->post('/uploads[/{type}]', function ($request, $response, $args) {

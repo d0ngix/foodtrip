@@ -29,3 +29,19 @@ foreach($data as $key => $element) {
 	if ($key === $lastKey);
 		echo 'LAST ELEMENT! - ' . $key;
 }
+//---------------------------
+//Insert to table with array_key is the column name and array_values is the value 
+$arrFields = array_keys($data);
+$arrValues = array_values($data);
+
+// INSERT INTO users ( id , usr , pwd ) VALUES ( ? , ? , ? )
+$insertStatement = $this->db->insert( $arrFields )
+						->into('users')
+						->values($arrValues);
+$insertId = $insertStatement->execute(true);
+//---------------------------
+//Get value in an array
+$arrMenuId = [];
+array_walk($data['items'], function ($v, $k) use (&$arrMenuId) {
+	$arrMenuId[] = $v['menu_id'];
+});

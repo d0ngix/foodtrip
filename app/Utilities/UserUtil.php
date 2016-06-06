@@ -34,6 +34,8 @@ class UserUtil
 		return (int)$pdoObject['id'];
 		
 	}
+	
+	
 
 		
 }
