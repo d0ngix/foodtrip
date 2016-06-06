@@ -52,6 +52,8 @@ $app->post('/transac/{user_uuid}', function ($request, $response, $args) {
 	
 	try {
 		
+		$dataBody['transac']['uuid'] = uniqid();
+		
 		//insert into transactions table
 		$arrFields = array_keys($dataBody['transac']);
 		$arrValues = array_values($dataBody['transac']);
