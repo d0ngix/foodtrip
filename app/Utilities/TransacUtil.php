@@ -38,14 +38,27 @@ class TransacUtil {
 	}
 	
 	//check if uuid for valid transaction
-	public function checkTransac ($strUuid) {
-	
-		$selectStmt = $this->db->select(array('id'))->from('transactions')->where('uuid','=',$strUuid);
-		$arrResult = $selectStmt->execute()->fetch();
-	
-		if (!$arrResult) return false;
-	
-		return $arrResult['id'];
+	public function checkTransac ($strUuid, $intUserId, $intStatus = null) {
+
+		$arrWhere = [];
+		if (!empty($strUuid))
+			$arrWhere['uuid'] = $strUuid;
+		if(!empty($intUserId))
+			 $arrWhere['user_id'] = $intUserId;
+		if(!empty($intStatus))
+			$arrWhere['status'] = $intStatus;
+
+		$selectStmt = $this->db->select()->from('transactions');
+		$selectStmt = $selectStmt->whereMany($arrWhere,'=');
+				
+		$selectStmt = $selectStmt->execute();
+		
+		if (!empty($strUuid)) //Single Transaction
+			$arrResult = $selectStmt->fetch();
+		else 
+			$arrResult = $selectStmt->fetchAll();
+		
+		return $arrResult;
 	
 	}	
 	

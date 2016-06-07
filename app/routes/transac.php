@@ -1,8 +1,17 @@
 <?php
 
+/* *
+ * Submit Order
+ * */
 $app->post('/transac/{user_uuid}', function ($request, $response, $args) {
 	
 	$dataBody = $request->getParsedBody();
+	
+	//check items
+	if (empty($dataBody['items'])) {
+		$response->withJson("No Item(s) Found!" ,500);
+		return $response;		
+	}  
 
 	//check user if valid
 	$userId = $this->UserUtil->checkUser($args['user_uuid']);
@@ -92,6 +101,114 @@ $app->post('/transac/{user_uuid}', function ($request, $response, $args) {
 	//insert into items table
 
 });
+
+
+/* *
+ * Get Single Orders "order"
+ * */
+$app->get('/transac/order/{user_uuid}/{trasac_uuid}', function($request, $response, $args){
+
+	//check user if valid
+	$userId = $this->UserUtil->checkUser($args['user_uuid']);
+	if ( ! $userId ) {
+		$response->withJson("Invalid User" ,500);
+		return $response;
+	}
+		
+	$arrTransac = $this->TransacUtil->checkTransac($args['trasac_uuid'], $userId);
+	if ( ! $arrTransac ) {
+		$response->withJson("No Record(s) Found!" ,500);
+		return $response;
+	}
+	
+	try {
+		
+		//get items on this transactions
+		$selectStmt = $this->db->select()->from('transaction_items')->where('transaction_id','=',$arrTransac['id']);
+		$selectStmt = $selectStmt->join('menus', 'transaction_items.menu_id','=','menus.id');
+		$selectStmt = $selectStmt->execute();
+		$arrResult = $selectStmt->fetchAll();
+		
+		//get menu images
+		if (!empty($arrResult))
+			$arrResult = $this->MenuUtil->getMenuImages($arrResult);
+		
+		$arrTransac['items'] = $arrResult;
+		
+		$response->withJson($arrTransac, 200);		
+		
+	} catch (Exception $e) {
+		
+		$response->withJson($e->getMessage(),500);
+		
+	}
+
+});
+
+/* *
+ * Get All Orders of the user - "orders"
+* */
+$app->get('/transac/orders/{user_uuid}[/{status}]', function($request, $response, $args){
+
+	//check user if valid
+	$userId = $this->UserUtil->checkUser($args['user_uuid']);
+	if ( ! $userId ) {
+		$response->withJson("Invalid User" ,500);
+		return $response;
+	}
+	
+	$intStatus = isset($args['status']) ? $args['status'] : null;
+
+	$arrTransac = $this->TransacUtil->checkTransac(null, $userId, $intStatus);
+	if ( ! $arrTransac ) {
+		$response->withJson("No Record(s) Found!" ,500);
+		return $response;
+	}
+	
+	try {
+		
+		//Extract transaction_id
+		foreach ($arrTransac as $v) {
+			$arrTransacId[] = $v['id'];
+		}
+		
+		//get items on this transactions
+		$selectStmt = $this->db->select()->from('transaction_items')->whereIn('transaction_id', $arrTransacId );
+		$selectStmt = $selectStmt->join('menus', 'transaction_items.menu_id','=','menus.id');
+		$selectStmt = $selectStmt->execute();
+		$arrResult = $selectStmt->fetchAll();
+		
+		//get menu images
+		if (!empty($arrResult)) {
+			$arrResult = $this->MenuUtil->getMenuImages($arrResult);
+		
+			//make transaction_id as the key
+			$arrResultNew = [];
+			foreach ($arrResult as $v)
+				$arrResultNew[$v['transaction_id']][] = $v; 	
+		
+			$arrResult = $arrResultNew;
+		}
+		
+		//set the items of each transactions
+		$arrTransacNew = [];
+		foreach ($arrTransac as $v) {
+			$v['items'] = $arrResult[$v['id']];
+			$arrTransacNew[] = $v;
+		}
+		$arrTransac = $arrTransacNew;
+
+		$response->withJson($arrTransac, 200);
+
+	} catch (Exception $e) {
+
+		$response->withJson($e->getMessage(),500);
+
+	}
+
+	});
+
+
 
 //Get promo discount
 

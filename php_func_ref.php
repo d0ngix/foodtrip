@@ -45,3 +45,7 @@ $arrMenuId = [];
 array_walk($data['items'], function ($v, $k) use (&$arrMenuId) {
 	$arrMenuId[] = $v['menu_id'];
 });
+//---------------------------
+//return query params
+$selectStmt->debugDumpParams();
+//---------------------------
