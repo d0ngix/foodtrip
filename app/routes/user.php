@@ -23,7 +23,7 @@ $app->post('/user', function ( $request, $response, $args) {
 	//check for data, return false if empty
 	if (empty($data)) {
 		//$response->setStatus(500);
-		$response->withJson('Empty form!',500);
+		$response->withJson(array('status'=>false,"message"=>'Empty Form!'),500);
 		return $response;
 	}
 	
@@ -32,13 +32,13 @@ $app->post('/user', function ( $request, $response, $args) {
 	$isExist = $isExist->execute(false);
 	
 	if (!empty($isExist->fetch())) {
-		$response->withJson('User already exist!',500);
+		$response->withJson(array('status'=>false,"message"=>'User already exist!'),500);
 		return $response;		
 	}
 
 	//check for email and password if empty
 	if (empty($data['password']) || empty($data['email'])) {
-		$response->withJson('Email or Password must not be empty!',500);
+		$response->withJson(array('status'=>false,"message"=>'Email or Password must not be empty!'),500);
 		return $response;
 	}
 	
@@ -54,20 +54,25 @@ $app->post('/user', function ( $request, $response, $args) {
 	$arrFields = array_keys($data);
 	$arrValues = array_values($data);
 
-	// INSERT INTO users ( id , usr , pwd ) VALUES ( ? , ? , ? )
-	$insertStatement = $this->db->insert( $arrFields )
-								->into('users')
-								->values($arrValues);
-	$insertId = $insertStatement->execute(true);
-	if (!$insertId) {
-		$this->logger->addError($insertId);
-		$response->withJson("Error saving your record",500);
+	try {
+		
+		// INSERT INTO users ( id , usr , pwd ) VALUES ( ? , ? , ? )
+		$insertStatement = $this->db->insert( $arrFields )
+									->into('users')
+									->values($arrValues);
+		$insertId = $insertStatement->execute(true);
+				
+		//return the uuid
+		$strUuid = $this->db->select(array('uuid'))->from('users')->where('id','=',$insertId);
+		$strUuid = $strUuid->execute(false);
+		$response->withJson(array('status'=>true, "data"=>$strUuid->fetch()), 200);		
+		
+	} catch (Exception $e) {
+		
+		$response->withJson(array('status'=>false, "message"=> $e->getMessage() ), 200);
+		
 	}
-	
-	//return the uuid
-	$strUuid = $this->db->select(array('uuid'))->from('users')->where('id','=',$insertId);
-	$strUuid = $strUuid->execute(false);
-	$response->withJson($strUuid->fetch(),200);
+
 	
 });
 
@@ -81,14 +86,14 @@ $app->put('/user[/{uuid}]', function ( $request, $response, $args) {
 	//check for data, return false if empty
 	if (empty($data)) {
 		//$response->setStatus(500);
-		$response->withJson('Empty form!',500);
+		$response->withJson(array('status'=>false,"message"=>'Empty Form!'),500);
 		return false;
 	}
 
 	//check user if valid
 	$userId = $this->UserUtil->checkUser($args['uuid']);
 	if ( ! $userId ) {
-		$response->withJson("Invalid User" ,500);
+		$response->withJson(array('status'=>false,"message"=>"Invalid User!") ,500);
 		return $response;
 	}
 	
@@ -99,11 +104,21 @@ $app->put('/user[/{uuid}]', function ( $request, $response, $args) {
 		$data['password'] = password_hash($passwordFromPost, PASSWORD_BCRYPT, $options);
 	}	
 	
+	try {
+		
+		$updateStatement = $this->db->update( $data )
+									->table('users')
+									->where('uuid', '=', $args['uuid']);
+		$blnResult = $updateStatement->execute(true);
+		$response->withJson(array('status'=>true, "data"=>$blnResult),200);		
+		
+	} catch (Exception $e) {
+
+		$response->withJson(array('status'=>false, "message"=>$e->getMessage()),200);
+		
+	}
 	// UPDATE users SET pwd = ? WHERE id = ?
-	$updateStatement = $this->db->update( $data )
-	                           ->table('users')
-	                           ->where('uuid', '=', $args['uuid']);
-	$blnResult = $updateStatement->execute(true);
-	$response->withJson($blnResult,200);
+
+	
 		
 });
