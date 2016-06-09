@@ -146,7 +146,7 @@ $app->get('/transac/order/{user_uuid}/{trasac_uuid}', function($request, $respon
 });
 
 /* *
- * Get All Orders of the user - "orders"
+ * Get All Orders of a user - "orders"
 * */
 $app->get('/transac/orders/{user_uuid}[/{status}]', function($request, $response, $args){
 
@@ -206,8 +206,12 @@ $app->get('/transac/orders/{user_uuid}[/{status}]', function($request, $response
 
 	}
 
-	});
+});
 
+
+/* *
+ * 
+ * */
 
 
 //Get promo discount

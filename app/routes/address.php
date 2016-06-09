@@ -19,107 +19,111 @@ $app->get('/address[/{uuid}]', function ( $request, $response, $args) {
 
 });
 
-	$app->post('/address[/{uuid}]', function ( $request, $response, $args) {
+$app->post('/address[/{uuid}]', function ( $request, $response, $args) {
 
-		$data = $request->getParsedBody();
+	$data = $request->getParsedBody();
 
-		//check for data, return false if empty
-		if ( empty($data) ) {
-			$response->withJson('Empty form!',500);
-			return $response;
-		}
+	//check for data, return false if empty
+	if ( empty($data) ) {
+		$response->withJson('Empty form!',500);
+		return $response;
+	}
 
-		//check user if valid
-		$userId = $this->UserUtil->checkUser($args['uuid']);
-		if ( ! $userId ) {
-			$response->withJson("Invalid User" ,500);
-			return $response;
-		}
+	//check user if valid
+	$userId = $this->UserUtil->checkUser($args['uuid']);
+	if ( ! $userId ) {
+		$response->withJson("Invalid User" ,500);
+		return $response;
+	}
 
-		$data['user_uuid'] = $args['uuid'];
-		$data['created'] = date('Y-m-d h:i:s');
+	$data['user_uuid'] = $args['uuid'];
+	$data['created'] = date('Y-m-d h:i:s');
 
-		$arrFields = array_keys($data);
-		$arrValues = array_values($data);
+	$arrFields = array_keys($data);
+	$arrValues = array_values($data);
 
-		try {
-			// INSERT INTO address ( id , usr , pwd ) VALUES ( ? , ? , ? )
-			$insertStatement = $this->db->insert( $arrFields )
-			->into('addresses')
-			->values($arrValues);
+	try {
+		// INSERT INTO address ( id , usr , pwd ) VALUES ( ? , ? , ? )
+		$insertStatement = $this->db->insert( $arrFields )
+		->into('addresses')
+		->values($arrValues);
 
-			$insertId = $insertStatement->execute(true);
-			$response->withJson($insertId, 200);
+		$insertId = $insertStatement->execute(true);
+		$response->withJson($insertId, 200);
 
-		} catch (PDOException $e) {
+	} catch (PDOException $e) {
 
-			$response->withJson($e->getMessage(), 404);
+		$response->withJson($e->getMessage(), 404);
 
-		}
+	}
 
-	});
+});
 
-		$app->put('/address[/{id}]', function ( $request, $response, $args) {
+$app->put('/address[/{id}]', function ( $request, $response, $args) {
 
-			$data = $request->getParsedBody();
+	$data = $request->getParsedBody();
 
-			//check for data, return false if empty
-			if (empty($data)) {
-				//$response->setStatus(500);
-				$response->withJson('Empty form!',500);
-				return false;
-			}
+	//check for data, return false if empty
+	if (empty($data)) {
+		//$response->setStatus(500);
+		$response->withJson('Empty form!',500);
+		return false;
+	}
 
-			//check user if valid
-			$userId = $this->UserUtil->checkUser($data['user_uuid']);
-			if ( ! $userId ) {
-				$response->withJson("Invalid User" ,500);
-				return $response;
-			}
+	//check user if valid
+	$userId = $this->UserUtil->checkUser($data['user_uuid']);
+	if ( ! $userId ) {
+		$response->withJson("Invalid User" ,500);
+		return $response;
+	}
 
-			// UPDATE users SET pwd = ? WHERE id = ?
-			$updateStatement = $this->db->update( $data )
-			->table('addresses')
-			->where('id', '=', $args['id']);
+	// UPDATE users SET pwd = ? WHERE id = ?
+	$updateStatement = $this->db->update( $data )
+	->table('addresses')
+	->where('id', '=', $args['id']);
 
 
-			$insertId = $updateStatement->execute(true);
-			$response->withJson($insertId,200);
+	$insertId = $updateStatement->execute(true);
+	$response->withJson($insertId,200);
 
-		});
+});
 
-			$app->delete('/address[/{id}]', function ( $request, $response, $args) {
 
-				$data = $request->getParsedBody();
+/* *
+ * Delete Adddress
+ * */
+$app->delete('/address[/{id}]', function ( $request, $response, $args) {
 
-				//check for data, return false if empty
-				if (empty($data)) {
-					//$response->setStatus(500);
-					$response->withJson('Empty form!',500);
-					return false;
-				}
+	$data = $request->getParsedBody();
 
-				//check user if valid
-				$blnValidUser = $this->UserUtil->checkUser($this->db, $data['user_uuid']);
-				if ( !$blnValidUser ) {
-					$response->withJson('Invalid User!',500);
-					return $response;
-				}
+	//check for data, return false if empty
+	if (empty($data)) {
+		//$response->setStatus(500);
+		$response->withJson('Empty form!',500);
+		return false;
+	}
 
-				try {
-					// DELETE FROM users WHERE id = ?
-					$deleteStatement = $this->db->delete()
-					->from('addresses')
-					->where('id', '=', $args['id']);
+	//check user if valid
+	$blnValidUser = $this->UserUtil->checkUser($this->db, $data['user_uuid']);
+	if ( !$blnValidUser ) {
+		$response->withJson('Invalid User!',500);
+		return $response;
+	}
 
-					$affectedRows = $deleteStatement->execute();
+	try {
+		// DELETE FROM users WHERE id = ?
+		$deleteStatement = $this->db->delete()
+		->from('addresses')
+		->where('id', '=', $args['id']);
 
-					$response->withJson($affectedRows,200);
+		$affectedRows = $deleteStatement->execute();
 
-				} catch (PDOException $e) {
+		$response->withJson($affectedRows,200);
 
-					$response->withJson($e->getMessage(), 404);
+	} catch (PDOException $e) {
 
-				}
+		$response->withJson($e->getMessage(), 404);
 
-			});
+	}
+
+});

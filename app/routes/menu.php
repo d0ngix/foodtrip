@@ -78,78 +78,85 @@ $app->post('/menu', function($request, $response, $args){
 	});
 
 
-		//Get Single Menu from Vendor
-		$app->get('/menu/{menu_id}', function ($request, $response, $args) {
+//Get Single Menu from Vendor
+$app->get('/menu/{menu_id}', function ($request, $response, $args) {
 
-			try {
+	try {
 
-				$selectStatement = $this->db->select()->from('menus')->where('id', '=', $args['menu_id']);
-				$stmt = $selectStatement->execute(false);
-				$data = $stmt->fetchAll();
+		$selectStatement = $this->db->select()->from('menus')->where('id', '=', $args['menu_id']);
+		$stmt = $selectStatement->execute(false);
+		$data = $stmt->fetchAll();
 
-				$blnRatings = $this->MenuUtil->getRatings($data);
+		$blnRatings = $this->MenuUtil->getRatings($data);
 
-				if (!empty($data))
-					$data = $this->MenuUtil->getMenuImages($data);
+		if (!empty($data))
+			$data = $this->MenuUtil->getMenuImages($data);
 
-				$response->withJson($data, 200);
+		$response->withJson($data, 200);
 
-			} catch (Exception $e) {
+	} catch (Exception $e) {
 
-				$response->withJson($e->getMessage(), 200);
+		$response->withJson($e->getMessage(), 200);
 
-			}
+	}
 
-		});
+});
 
-			//Rate a Menu w/ Comment
-			$app->post('/menu/rate/{user_uuid}', function($request, $response, $args){
+//Rate a Menu w/ Comment
+$app->post('/menu/rate/{user_uuid}', function($request, $response, $args){
 
-				$data = $request->getParsedBody();
+	$data = $request->getParsedBody();
 
-				//check user if valid
-				$userId = $this->UserUtil->checkUser($args['user_uuid']);
-				if ( ! $userId ) {
-					$response->withJson("Invalid User" ,500);
-					return $response;
-				}
-				$data['user_id'] = $userId;
+	//check user if valid
+	$userId = $this->UserUtil->checkUser($args['user_uuid']);
+	if ( ! $userId ) {
+		$response->withJson("Invalid User" ,500);
+		return $response;
+	}
+	$data['user_id'] = $userId;
+	
+	//set rating
+	$arrRatings = array( 1 => 'one', 2 => 'two', 3 => 'three', 4 => 'four', 5 => 'five');
+	$data[$arrRatings[$data['rate']]] = 1;
+	unset($data['rate']);	
+	
+	$arrFields = array_keys($data);
+	$arrValues = array_values($data);
 
-				$arrFields = array_keys($data);
-				$arrValues = array_values($data);
+	try {
+		
+		// INSERT INTO users ( id , usr , pwd ) VALUES ( ? , ? , ? )
+		$insertStatement = $this->db->insert( $arrFields )
+									->into('menu_ratings')
+									->values($arrValues);
+		$insertId = $insertStatement->execute(true);
 
-				try {
-					// INSERT INTO users ( id , usr , pwd ) VALUES ( ? , ? , ? )
-					$insertStatement = $this->db->insert( $arrFields )
-					->into('menu_ratings')
-					->values($arrValues);
-					$insertId = $insertStatement->execute(true);
+		//retrieve the menu details
+		$selectStmt = $this->db->select()->from('menus')->where('id','=',$data['menu_id']);
+		$selectStmt = $selectStmt->execute(false);
+		$data = $selectStmt->fetchAll();
 
-					//retrieve the menu details
-					$selectStmt = $this->db->select()->from('menus')->where('id','=',$data['menu_id']);
-					$selectStmt = $selectStmt->execute(false);
-					$data = $selectStmt->fetchAll();
+		$blnRatings = $this->MenuUtil->getRatings($data);
 
-					$blnRatings = $this->MenuUtil->getRatings($data);
+		$response->withJson($data, 200);
 
-					$response->withJson($data, 200);
+	} catch (Exception $e) {
 
-				} catch (Exception $e) {
+		$response->withJson($e->getMessage(), 200);
+	}
 
-					$response->withJson($e->getMessage(), 200);
-				}
+});
 
-			});
+//Get Menu Ratings
+$app->get('/menu/rate/{menu_id}', function ($request, $response, $args) {
 
-				$app->get('/menu/rate/{menu_id}', function ($request, $response, $args) {
+	//retrieve the menu details
+	$selectStmt = $this->db->select()->from('menus')->where('id','=',$args['menu_id']);
+	$selectStmt = $selectStmt->execute(false);
+	$data = $selectStmt->fetchAll();
 
-					//retrieve the menu details
-					$selectStmt = $this->db->select()->from('menus')->where('id','=',$args['menu_id']);
-					$selectStmt = $selectStmt->execute(false);
-					$data = $selectStmt->fetchAll();
+	$ratings = $this->MenuUtil->getRatings($data);
 
-					$ratings = $this->MenuUtil->getRatings($data);
+	$response->withJson($data, 200);
 
-					$response->withJson($data, 200);
-
-				});
+});
