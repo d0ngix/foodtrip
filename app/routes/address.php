@@ -92,29 +92,29 @@ $app->put('/address[/{id}]', function ( $request, $response, $args) {
 /* *
  * Delete Adddress
  * */
-$app->delete('/address[/{id}]', function ( $request, $response, $args) {
+$app->delete('/address/{user_uuid}/{id}', function ( $request, $response, $args) {
 
-	$data = $request->getParsedBody();
+	//$data = $request->getParsedBody();
 
-	//check for data, return false if empty
-	if (empty($data)) {
-		//$response->setStatus(500);
-		$response->withJson('Empty form!',500);
-		return false;
-	}
+// 	//check for data, return false if empty
+// 	if (empty($data)) {
+// 		//$response->setStatus(500);
+// 		$response->withJson('Empty form!',500);
+// 		return false;
+// 	}
 
 	//check user if valid
-	$blnValidUser = $this->UserUtil->checkUser($this->db, $data['user_uuid']);
-	if ( !$blnValidUser ) {
-		$response->withJson('Invalid User!',500);
+	$userId = $this->UserUtil->checkUser($args['user_uuid']);
+	if ( ! $userId ) {
+		$response->withJson("Invalid User" ,500);
 		return $response;
 	}
 
 	try {
 		// DELETE FROM users WHERE id = ?
 		$deleteStatement = $this->db->delete()
-		->from('addresses')
-		->where('id', '=', $args['id']);
+									->from('addresses')
+									->whereMany(array('id'=>$args['id'], 'user_id' => $userId), '=');
 
 		$affectedRows = $deleteStatement->execute();
 

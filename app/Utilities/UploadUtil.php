@@ -30,7 +30,9 @@ class UploadUtil
 			if (!is_object($file)) return $file;
 
 			// Success!
-			return $file->upload();
+			if ($file->upload()) return $file;
+			
+			return false;
 				
 		} catch (Exception $e) {
 				

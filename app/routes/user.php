@@ -3,15 +3,29 @@
 //use Controller\UserController;
 
 $app->get('/user[/{uuid}]', function ( $request, $response, $args) {
-	$selectUserStatement = $this->db->select()->from('users')->where('uuid','=',$args['uuid']);
-	$stmt = $selectUserStatement->execute(false);
-	$data = $stmt->fetch();
 	
-	//unjson the photo details
-	if (!empty($data)) 
-		$data['photo'] = json_decode($data['photo'],true);
+	try {
 
-	$response->withJson($data, 200);
+		$selectUserStatement = $this->db->select()->from('users')->where('uuid','=',$args['uuid']);
+		$stmt = $selectUserStatement->execute(false);
+		$data = $stmt->fetch();
+		
+		if (!$data)
+			return $response->withJson(array('status'=>false, 'message'=>'Usre Not Found!'), 200); 
+		
+		//un-json the photo details
+		if (!empty($data['photo']))
+			$data['photo'] = json_decode($data['photo'],true);
+		
+		$response->withJson(array('status'=>false, 'data'=>$data) , 200);		
+		
+	} catch (Exception $e) {
+		
+		$response->withJson(array("status" => false, "message" => $e->getMessage()), 200);
+		
+	}
+	
+
 
 });
 
@@ -110,7 +124,7 @@ $app->put('/user[/{uuid}]', function ( $request, $response, $args) {
 									->table('users')
 									->where('uuid', '=', $args['uuid']);
 		$blnResult = $updateStatement->execute(true);
-		$response->withJson(array('status'=>true, "data"=>$blnResult),200);		
+		$response->withJson(array('status'=>true, "data"=>$data),200);		
 		
 	} catch (Exception $e) {
 
