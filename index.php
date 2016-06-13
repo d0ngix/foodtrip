@@ -160,13 +160,23 @@ require 'app/routes/transac.php';
 //API - uploads
 $app->post('/uploads[/{type}]', function ($request, $response, $args) {
 
-	$blnValidUser = $this->UploadUtil->upload($args, $request);
-	if ( $blnValidUser !== true ) {
-		$response->withJson($blnValidUser ,500);
+	$file = $this->UploadUtil->upload($args, $request);
+
+	if ( $file === false) {
+		$response->withJson( array("status"=>false, "message"=>"Upload Error!"),500);
 		return $response;		
 	}
+	
+	$data = array(
+			'name'       => $file->getNameWithExtension(),
+			'extension'  => $file->getExtension(),
+			//'mime'       => $file->getMimetype(),
+			'size'       => $file->getSize(),
+			//'md5'        => $file->getMd5(),
+			//'dimensions' => json_encode($file->getDimensions())
+	);	
 
-	return $response->withJson($blnValidUser,200);
+	$response->withJson(array('status'=>true, 'data'=>$data),200);
 
 });
 
