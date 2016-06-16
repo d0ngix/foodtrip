@@ -1,2 +1,6 @@
 
 *.log
+
+heroku_key
+
+heroku_key.pub
