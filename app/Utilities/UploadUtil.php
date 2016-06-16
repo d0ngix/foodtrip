@@ -52,7 +52,7 @@ class UploadUtil
 		$objUserUtil = new \Utilities\UserUtil($this->db);
 		$userId = $objUserUtil->checkUser($requestData['user_uuid']);
 		if ( ! $userId ) {
-			$response->withJson("Invalid User" ,500);
+			$response->withJson(array("status" => false, "message" =>"Invalid User!"), 404);
 			return $response;
 		}
 
@@ -93,7 +93,7 @@ class UploadUtil
 			// INSERT INTO users ( id , usr , pwd ) VALUES ( ? , ? , ? )
 			$updataeStatement = $this->db->update( array('photo' => json_encode($data)) )
 										->table('users')
-										->where('uuid', '=', $userId);
+										->where('id', '=', $userId);
 			$updateId = $updataeStatement->execute(true);
 
 		} catch (Exception $e) {

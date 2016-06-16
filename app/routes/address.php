@@ -7,15 +7,15 @@ $app->get('/address[/{uuid}]', function ( $request, $response, $args) {
 	//check user if valid
 	$userId = $this->UserUtil->checkUser($args['uuid']);
 	if ( ! $userId ) {
-		$response->withJson("Invalid User" ,500);
+		$response->withJson(array("status" => false, "message" => "Invalid User"), 404);
 		return $response;
 	}
 
 	$selectUserStatement = $this->db->select()->from('addresses')->where('user_uuid','=',$args['uuid']);
 	$stmt = $selectUserStatement->execute(false);
 	$data = $stmt->fetchAll();
-	$response->withStatus(200);
-	$response->withJson($data);
+	
+	return $response->withJson(array("status" => true, "data" => $data), 200);
 
 });
 
@@ -25,14 +25,14 @@ $app->post('/address[/{uuid}]', function ( $request, $response, $args) {
 
 	//check for data, return false if empty
 	if ( empty($data) ) {
-		$response->withJson('Empty form!',500);
+		$response->withJson(array("status" => false, "message" => 'Empty form!'), 404);
 		return $response;
 	}
 
 	//check user if valid
 	$userId = $this->UserUtil->checkUser($args['uuid']);
 	if ( ! $userId ) {
-		$response->withJson("Invalid User" ,500);
+		$response->withJson(array("status" => false, "message" => "Invalid User"), 404);
 		return $response;
 	}
 
@@ -45,15 +45,15 @@ $app->post('/address[/{uuid}]', function ( $request, $response, $args) {
 	try {
 		// INSERT INTO address ( id , usr , pwd ) VALUES ( ? , ? , ? )
 		$insertStatement = $this->db->insert( $arrFields )
-		->into('addresses')
-		->values($arrValues);
+									->into('addresses')
+									->values($arrValues);
 
 		$insertId = $insertStatement->execute(true);
-		$response->withJson($insertId, 200);
+		return $response->withJson(array("status" => true, "data" => $insertId), 200);
 
 	} catch (PDOException $e) {
 
-		$response->withJson($e->getMessage(), 404);
+		return $response->withJson(array("status" => false, "message" => $e->getMessage()), 500);
 
 	}
 
@@ -66,25 +66,23 @@ $app->put('/address[/{id}]', function ( $request, $response, $args) {
 	//check for data, return false if empty
 	if (empty($data)) {
 		//$response->setStatus(500);
-		$response->withJson('Empty form!',500);
-		return false;
+		return $response->withJson(array("status" => false, "message" => 'Empty form!'), 404);
 	}
 
 	//check user if valid
 	$userId = $this->UserUtil->checkUser($data['user_uuid']);
 	if ( ! $userId ) {
-		$response->withJson("Invalid User" ,500);
+		$response->withJson(array("status" => false, "message" => "Invalid User"), 404);
 		return $response;
 	}
 
 	// UPDATE users SET pwd = ? WHERE id = ?
 	$updateStatement = $this->db->update( $data )
-	->table('addresses')
-	->where('id', '=', $args['id']);
-
+								->table('addresses')
+								->where('id', '=', $args['id']);
 
 	$insertId = $updateStatement->execute(true);
-	$response->withJson($insertId,200);
+	return $response->withJson(array("status" => true, "data" => $insertId), 200);
 
 });
 
@@ -94,19 +92,10 @@ $app->put('/address[/{id}]', function ( $request, $response, $args) {
  * */
 $app->delete('/address/{user_uuid}/{id}', function ( $request, $response, $args) {
 
-	//$data = $request->getParsedBody();
-
-// 	//check for data, return false if empty
-// 	if (empty($data)) {
-// 		//$response->setStatus(500);
-// 		$response->withJson('Empty form!',500);
-// 		return false;
-// 	}
-
 	//check user if valid
 	$userId = $this->UserUtil->checkUser($args['user_uuid']);
 	if ( ! $userId ) {
-		$response->withJson("Invalid User" ,500);
+		$response->withJson(array("status" => false, "message" => "Invalid User"),500);
 		return $response;
 	}
 
@@ -118,11 +107,11 @@ $app->delete('/address/{user_uuid}/{id}', function ( $request, $response, $args)
 
 		$affectedRows = $deleteStatement->execute();
 
-		$response->withJson($affectedRows,200);
+		return $response->withJson(array("status" => true, "data" => $affectedRows), 200);
 
 	} catch (PDOException $e) {
 
-		$response->withJson($e->getMessage(), 404);
+		return $response->withJson(array("status" => false, "message" => $e->getMessage()), 500);
 
 	}
 

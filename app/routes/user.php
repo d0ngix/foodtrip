@@ -17,11 +17,11 @@ $app->get('/user[/{uuid}]', function ( $request, $response, $args) {
 		if (!empty($data['photo']))
 			$data['photo'] = json_decode($data['photo'],true);
 		
-		$response->withJson(array('status'=>false, 'data'=>$data) , 200);		
+		return $response->withJson(array('status'=>false, 'data'=>$data) , 200);		
 		
 	} catch (Exception $e) {
 		
-		$response->withJson(array("status" => false, "message" => $e->getMessage()), 200);
+		return $response->withJson(array("status" => false, "message" => $e->getMessage()), 200);
 		
 	}
 	
@@ -79,11 +79,12 @@ $app->post('/user', function ( $request, $response, $args) {
 		//return the uuid
 		$strUuid = $this->db->select(array('uuid'))->from('users')->where('id','=',$insertId);
 		$strUuid = $strUuid->execute(false);
-		$response->withJson(array('status'=>true, "data"=>$strUuid->fetch()), 200);		
+		
+		return $response->withJson(array('status'=>true, "data"=>$strUuid->fetch()), 200);		
 		
 	} catch (Exception $e) {
 		
-		$response->withJson(array('status'=>false, "message"=> $e->getMessage() ), 200);
+		return $response->withJson(array('status'=>false, "message"=> $e->getMessage() ), 200);
 		
 	}
 
@@ -124,15 +125,43 @@ $app->put('/user[/{uuid}]', function ( $request, $response, $args) {
 									->table('users')
 									->where('uuid', '=', $args['uuid']);
 		$blnResult = $updateStatement->execute(true);
-		$response->withJson(array('status'=>true, "data"=>$data),200);		
+		
+		return $response->withJson(array('status'=>true, "data"=>$data),200);		
 		
 	} catch (Exception $e) {
 
-		$response->withJson(array('status'=>false, "message"=>$e->getMessage()),200);
+		return $response->withJson(array('status'=>false, "message"=>$e->getMessage()),200);
 		
 	}
-	// UPDATE users SET pwd = ? WHERE id = ?
-
-	
 		
+});
+
+
+/* *
+ * User Login
+ * */
+$app->post('/user/login', function ($request, $response, $args) {
+
+	$data = $request->getParsedBody();
+
+	try {
+		
+		//search for the user
+		$selectStmt = $this->db->select()->from('users')->where('email','=',$data['email']);
+		$selectStmt = $selectStmt->execute(true);
+		$arrResult = $selectStmt->fetch();		
+
+		//verify the password
+		if (!password_verify($data['password'], $arrResult['password'])) {
+			return $response->withJson(array('status'=>false, "message"=> 'Invalid Username or Password!'), 404);
+		}
+		
+		return $response->withJson(array('status'=>true, "data"=>$arrResult),200);
+		
+	} catch (Exception $e) {
+		
+		return $response->withJson(array('status'=>false, "message"=>$e->getMessage()),200);
+		
+	}
+
 });

@@ -9,14 +9,14 @@ $app->post('/transac/{user_uuid}', function ($request, $response, $args) {
 	
 	//check items
 	if (empty($dataBody['items'])) {
-		$response->withJson("No Item(s) Found!" ,500);
+		$response->withJson(array("status" => false, "message" => "No Item(s) Found!") , 404);
 		return $response;		
 	}  
 
 	//check user if valid
 	$userId = $this->UserUtil->checkUser($args['user_uuid']);
 	if ( ! $userId ) {
-		$response->withJson("Invalid User" ,500);
+		$response->withJson(array("status" => false, "message" =>"Invalid User!"), 404);
 		return $response;
 	}
 	$dataBody['transac']['user_id'] = $userId;
@@ -24,7 +24,7 @@ $app->post('/transac/{user_uuid}', function ($request, $response, $args) {
 	//check given price
 	$blnPrice = $this->TransacUtil->checkPrices($dataBody['items']);
 	if(!$blnPrice) {
-		$response->withJson("Price changes detected" ,500);
+		$response->withJson(array("status" => false, "message" =>"Price Changes Detected!"), 404);
 		return $response;		
 	}
 	
@@ -43,14 +43,14 @@ $app->post('/transac/{user_uuid}', function ($request, $response, $args) {
 	if (!empty($dataBody['transac']['address_id'])){
 		$blnDeliveryCost = $this->TransacUtil->checkDeliveryCost($dataBody['transac']['address_id'], $dataBody['transac']['delivery_cost']); 
 		if (!$blnDeliveryCost)
-			$response->withJson("Delivery Cost Not Matched!" ,500);
+			return $response->withJson(array("status" => false, "message" =>"Delivery Cost Not Matched!"), 404);
 	}
 	
 	//check promo code if exist or not expired. return the promo discount amount
 	if (!empty($dataBody['transac']['promo_code'])) {
 		$blnDiscount = $this->TransacUtil->checkPromoCode($dataBody['transac']['promo_code'], $dataBody['transac']['discount']);
 		if (!$blnDiscount)
-			$response->withJson("Discount Not Matched!" ,500);		
+			return $response->withJson(array("status" => false, "message" =>"Discount Not Matched!"), 404);		
 	}
 	
 	//get the total amount
@@ -89,11 +89,11 @@ $app->post('/transac/{user_uuid}', function ($request, $response, $args) {
 			$insertId = $insertStatement->execute(true);			
 		}
 		
-		$response->withJson($strUuid, 200);
+		return $response->withJson(array("status" => true, "data" =>$strUuid), 200);
 				
 	} catch (Exception $e) {
 
-		$response->withJson($e->getMessage(), 500);
+		return $response->withJson(array("status" => false, "message" =>$e->getMessage()), 500);
 		
 	}
 
@@ -135,11 +135,11 @@ $app->get('/transac/order/{user_uuid}/{trasac_uuid}', function($request, $respon
 		
 		$arrTransac['items'] = $arrResult;
 		
-		$response->withJson($arrTransac, 200);		
+		return $response->withJson($arrTransac, 200);		
 		
 	} catch (Exception $e) {
 		
-		$response->withJson($e->getMessage(),500);
+		return $response->withJson($e->getMessage(),500);
 		
 	}
 
@@ -198,11 +198,11 @@ $app->get('/transac/orders/{user_uuid}[/{status}]', function($request, $response
 		}
 		$arrTransac = $arrTransacNew;
 
-		$response->withJson($arrTransac, 200);
+		return $response->withJson($arrTransac, 200);
 
 	} catch (Exception $e) {
 
-		$response->withJson($e->getMessage(),500);
+		return $response->withJson($e->getMessage(),500);
 
 	}
 

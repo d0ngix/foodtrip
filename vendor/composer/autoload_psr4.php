@@ -9,6 +9,7 @@ return array(
     'Utilities\\' => array($baseDir . '/app/Utilities'),
     'Symfony\\Component\\Yaml\\' => array($vendorDir . '/symfony/yaml'),
     'Slim\\PDO\\' => array($vendorDir . '/slim/pdo/src/PDO'),
+    'Slim\\HttpCache\\' => array($vendorDir . '/slim/http-cache/src'),
     'Slim\\' => array($baseDir . '/Slim'),
     'Psr\\Http\\Message\\' => array($vendorDir . '/psr/http-message/src'),
     'Monolog\\' => array($vendorDir . '/monolog/monolog/src/Monolog'),

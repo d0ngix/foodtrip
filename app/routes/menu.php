@@ -1,6 +1,7 @@
 <?php
-
-//Add New Menu
+/* *
+ * Add New Menu
+ * */
 $app->post('/menu', function($request, $response, $args){
 
 	$data = $request->getParsedBody();
@@ -8,7 +9,7 @@ $app->post('/menu', function($request, $response, $args){
 	//check for data, return false if empty
 	if (empty($data)) {
 		//$response->setStatus(500);
-		$response->withJson('Empty form!',500);
+		$response->withJson(array("status" => false, "message" => 'Empty form!'), 404);
 		return $response;
 	}
 
@@ -32,50 +33,52 @@ $app->post('/menu', function($request, $response, $args){
 
 		// INSERT INTO users ( id , usr , pwd ) VALUES ( ? , ? , ? )
 		$insertStatement = $this->db->insert( $arrFields )
-		->into('menus')
-		->values($arrValues);
+									->into('menus')
+									->values($arrValues);
 		$insertId = $insertStatement->execute(true);
 
-		$response->withJson($insertId, 200);
+		return $response->withJson(array("status" => true, "data" => $insertId), 200);
 
 	} catch (Exception $e) {
 
-		$response->withJson($e->getMessage(),404);
+		return $response->withJson(array("status" => false, "message" => $e->getMessage()),404);
 
 	}
 
 });
 
-	//Get All Menu from Vendor
-	$app->get('/menu/all/{vendor_uuid}', function ($request, $response, $args) {
+/* *
+ * Get All Menu from Vendor
+ * */
+$app->get('/menu/all/{vendor_uuid}', function ($request, $response, $args) {
 
-		//check vendor if valid
-		$vendorId = $this->UserUtil->checkVendor($args['vendor_uuid']);
-		if ( !is_int($vendorId) ) {
-			$response->withJson($vendorId ,500);
-			return $response;
-		}
+	//check vendor if valid
+	$vendorId = $this->UserUtil->checkVendor($args['vendor_uuid']);
+	if ( !is_int($vendorId) ) {
+		$response->withJson(array("status" => false, "message" => 'Invalid Vendor!'), 404);
+		return $response;
+	}
 
-		try {
+	try {
 
-			$selectStatement = $this->db->select()->from('menus')->whereMany(array('vendor_id' => $vendorId, 'is_active' => 1), '=');
-			$stmt = $selectStatement->execute(false);
-			$data = $stmt->fetchAll();
+		$selectStatement = $this->db->select()->from('menus')->whereMany(array('vendor_id' => $vendorId, 'is_active' => 1), '=');
+		$stmt = $selectStatement->execute(false);
+		$data = $stmt->fetchAll();
 
-			$blnRatings = $this->MenuUtil->getRatings($data);
+		$blnRatings = $this->MenuUtil->getRatings($data);
 
-			if (!empty($data))
-				$data = $this->MenuUtil->getMenuImages($data);
+		if (!empty($data))
+			$data = $this->MenuUtil->getMenuImages($data);
 
-			$response->withJson($data, 200);
+		return $response->withJson(array("status" => true, "data" => $data), 200);
 
-		} catch (Exception $e) {
+	} catch (Exception $e) {
 
-			$response->withJson($e->getMessage(), 200);
+		return $response->withJson(array("status" => false, "message" => $e->getMessage()), 404);
 
-		}
+	}
 
-	});
+});
 
 
 //Get Single Menu from Vendor
@@ -92,11 +95,11 @@ $app->get('/menu/{menu_id}', function ($request, $response, $args) {
 		if (!empty($data))
 			$data = $this->MenuUtil->getMenuImages($data);
 
-		$response->withJson($data, 200);
+		return $response->withJson(array("status" => true, "data" => $data), 200);
 
 	} catch (Exception $e) {
 
-		$response->withJson($e->getMessage(), 200);
+		return $response->withJson(array("status" => false, "message" => $e->getMessage()), 404);
 
 	}
 
@@ -138,11 +141,11 @@ $app->post('/menu/rate/{user_uuid}', function($request, $response, $args){
 
 		$blnRatings = $this->MenuUtil->getRatings($data);
 
-		$response->withJson($data, 200);
+		return $response->withJson(array("status" => true, "data" => $data), 200);
 
 	} catch (Exception $e) {
 
-		$response->withJson($e->getMessage(), 200);
+		return $response->withJson(array("status" => false, "message" => $e->getMessage()), 404);
 	}
 
 });
@@ -157,6 +160,6 @@ $app->get('/menu/rate/{menu_id}', function ($request, $response, $args) {
 
 	$ratings = $this->MenuUtil->getRatings($data);
 
-	$response->withJson($data, 200);
+	return $response->withJson(array("status" => true, "data" => $data), 200);
 
 });
