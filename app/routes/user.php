@@ -126,7 +126,7 @@ $app->put('/user[/{uuid}]', function ( $request, $response, $args) {
 									->where('uuid', '=', $args['uuid']);
 		$blnResult = $updateStatement->execute(true);
 		
-		return $response->withJson(array('status'=>true, "data"=>$data),200);		
+		return $response->withJson(array('status'=>true, "data"=>$data), 200);		
 		
 	} catch (Exception $e) {
 
@@ -148,7 +148,7 @@ $app->post('/user/login', function ($request, $response, $args) {
 		
 		//search for the user
 		$selectStmt = $this->db->select()->from('users')->where('email','=',$data['email']);
-		$selectStmt = $selectStmt->execute(true);
+		$selectStmt = $selectStmt->execute();
 		$arrResult = $selectStmt->fetch();		
 
 		//verify the password

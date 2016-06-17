@@ -82,7 +82,8 @@ $app->post('/transac/{user_uuid}', function ($request, $response, $args) {
 			
 			$arrFields = array_keys($value);
 			$arrValues = array_values($value);
-			
+
+			//insert into items table
 			$insertStatement = $this->db->insert( $arrFields )
 										->into('transaction_items')
 										->values($arrValues);
@@ -97,9 +98,6 @@ $app->post('/transac/{user_uuid}', function ($request, $response, $args) {
 		
 	}
 
-	
-	//insert into items table
-
 });
 
 
@@ -111,14 +109,13 @@ $app->get('/transac/order/{user_uuid}/{trasac_uuid}', function($request, $respon
 	//check user if valid
 	$userId = $this->UserUtil->checkUser($args['user_uuid']);
 	if ( ! $userId ) {
-		$response->withJson("Invalid User" ,500);
-		return $response;
+		return $response->withJson(array("status" => false, "message" =>"Invalid User!"), 404);
 	}
-		
+
+	//check transac if valid
 	$arrTransac = $this->TransacUtil->checkTransac($args['trasac_uuid'], $userId);
 	if ( ! $arrTransac ) {
-		$response->withJson("No Record(s) Found!" ,500);
-		return $response;
+		return $response->withJson(array("status" => false, "message" =>"No Record(s) Found!"), 404);
 	}
 	
 	try {
@@ -135,11 +132,11 @@ $app->get('/transac/order/{user_uuid}/{trasac_uuid}', function($request, $respon
 		
 		$arrTransac['items'] = $arrResult;
 		
-		return $response->withJson($arrTransac, 200);		
+		return $response->withJson(array("status" => true, "message" =>$arrTransac), 200);		
 		
 	} catch (Exception $e) {
 		
-		return $response->withJson($e->getMessage(),500);
+		return $response->withJson(array("status" => false, "message" =>$e->getMessage()), 500);
 		
 	}
 
@@ -153,16 +150,14 @@ $app->get('/transac/orders/{user_uuid}[/{status}]', function($request, $response
 	//check user if valid
 	$userId = $this->UserUtil->checkUser($args['user_uuid']);
 	if ( ! $userId ) {
-		$response->withJson("Invalid User" ,500);
-		return $response;
+		return $response->withJson(array("status" => false, "message" =>"Invalid User!"), 404);
 	}
 	
 	$intStatus = isset($args['status']) ? $args['status'] : null;
 
 	$arrTransac = $this->TransacUtil->checkTransac(null, $userId, $intStatus);
 	if ( ! $arrTransac ) {
-		$response->withJson("No Record(s) Found!" ,500);
-		return $response;
+		return $response->withJson(array("status" => false, "message" =>"No Record(s) Found!"), 404);
 	}
 	
 	try {
@@ -198,11 +193,11 @@ $app->get('/transac/orders/{user_uuid}[/{status}]', function($request, $response
 		}
 		$arrTransac = $arrTransacNew;
 
-		return $response->withJson($arrTransac, 200);
+		return $response->withJson(array("status" => true, "data" =>$arrTransac), 200);
 
 	} catch (Exception $e) {
 
-		return $response->withJson($e->getMessage(),500);
+		return $response->withJson(array("status" => false, "message" =>$e->getMessage()), 500);
 
 	}
 
@@ -210,8 +205,52 @@ $app->get('/transac/orders/{user_uuid}[/{status}]', function($request, $response
 
 
 /* *
- * 
+ * Update transaction_item status 
  * */
+$app->put('/transac/order/item/{user_uuid}/{trasac_uuid}', function($request, $response, $args){
+	
+	$data = $request->getParsedBody();
+	
+	//check user if valid
+	$userId = $this->UserUtil->checkUser($args['user_uuid']);
+	if ( ! $userId ) {
+		return $response->withJson(array("status" => false, "message" =>"Invalid User"), 404);
+	}	
+	
+	//check transac if valid
+	$arrTransac = $this->TransacUtil->checkTransac($args['trasac_uuid'], $userId);
+	if ( ! $arrTransac ) {
+		return $response->withJson(array("status" => false, "message" =>"No Record(s) Found!"), 404);
+	}
+	
+
+	try {
+			
+		$updateStmt = $this->db->update( array('status' => $data['status']) )
+								->table('transaction_items')
+								->whereIn('id',$data['id'],'AND')
+								->where('transaction_id','=',$arrTransac['id']);
+		$intCount = $updateStmt->execute();
+		
+		//if no rows updated
+		if ( ! $intCount ) {
+			return $response->withJson(array("status" => false, "message" =>"No Record(s) Found!"), 404);
+		}
+		
+		//select the updated items
+		$selectStmt = $this->db->select()->from('transaction_items')->whereIn('id',$data['id'],'AND')->where('transaction_id','=',$arrTransac['id']);
+		$selectStmt = $selectStmt->execute();
+		$arrResult = $selectStmt->fetchAll();		
+		
+		return $response->withJson(array("status" => true, "data" =>$arrResult), 200);
+		
+	} catch (Exception $e) {
+		
+		return $response->withJson(array("status" => false, "message" =>$e->getMessage()), 500);
+		
+	}
+	
+});
 
 
 //Get promo discount

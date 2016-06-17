@@ -2,19 +2,17 @@
 /* *
  * Add New Menu
  * */
-$app->post('/menu', function($request, $response, $args){
+$app->post('/menu/{vendor_uuid}', function($request, $response, $args){
 
 	$data = $request->getParsedBody();
 
 	//check for data, return false if empty
 	if (empty($data)) {
-		//$response->setStatus(500);
-		$response->withJson(array("status" => false, "message" => 'Empty form!'), 404);
-		return $response;
+		return $response->withJson(array("status" => false, "message" => 'Empty form!'), 404);
 	}
 
 	//check vendor if valid
-	$vendorId = $this->UserUtil->checkVendor($data['vendor_uuid']);
+	$vendorId = $this->UserUtil->checkVendor($args['vendor_uuid']);
 	if ( !is_int($vendorId) ) {
 		$response->withJson($vendorId ,500);
 		return $response;
@@ -36,12 +34,17 @@ $app->post('/menu', function($request, $response, $args){
 									->into('menus')
 									->values($arrValues);
 		$insertId = $insertStatement->execute(true);
+		
+		// Get the newly insert menu
+		$selectStatement = $this->db->select()->from('menus')->where('id','=',$insertId);
+		$selectStatement = $selectStatement->execute();
+		$arrResult = $selectStatement->fetch(); 
 
-		return $response->withJson(array("status" => true, "data" => $insertId), 200);
+		return $response->withJson(array("status" => true, "data" => $arrResult), 200);
 
 	} catch (Exception $e) {
 
-		return $response->withJson(array("status" => false, "message" => $e->getMessage()),404);
+		return $response->withJson(array("status" => false, "message" => $e->getMessage()), 500);
 
 	}
 
@@ -74,14 +77,15 @@ $app->get('/menu/all/{vendor_uuid}', function ($request, $response, $args) {
 
 	} catch (Exception $e) {
 
-		return $response->withJson(array("status" => false, "message" => $e->getMessage()), 404);
+		return $response->withJson(array("status" => false, "message" => $e->getMessage()), 500);
 
 	}
 
 });
 
-
-//Get Single Menu from Vendor
+/* *
+ * Get Single Menu from Vendor 
+ * */
 $app->get('/menu/{menu_id}', function ($request, $response, $args) {
 
 	try {
@@ -99,13 +103,15 @@ $app->get('/menu/{menu_id}', function ($request, $response, $args) {
 
 	} catch (Exception $e) {
 
-		return $response->withJson(array("status" => false, "message" => $e->getMessage()), 404);
+		return $response->withJson(array("status" => false, "message" => $e->getMessage()), 500);
 
 	}
 
 });
 
-//Rate a Menu w/ Comment
+/* *
+ * Rate a Menu w/ Comment
+ * */
 $app->post('/menu/rate/{user_uuid}', function($request, $response, $args){
 
 	$data = $request->getParsedBody();
@@ -145,21 +151,32 @@ $app->post('/menu/rate/{user_uuid}', function($request, $response, $args){
 
 	} catch (Exception $e) {
 
-		return $response->withJson(array("status" => false, "message" => $e->getMessage()), 404);
+		return $response->withJson(array("status" => false, "message" => $e->getMessage()), 500);
 	}
 
 });
 
-//Get Menu Ratings
+/* *
+ * Get Menu Ratings
+ * */
 $app->get('/menu/rate/{menu_id}', function ($request, $response, $args) {
 
-	//retrieve the menu details
-	$selectStmt = $this->db->select()->from('menus')->where('id','=',$args['menu_id']);
-	$selectStmt = $selectStmt->execute(false);
-	$data = $selectStmt->fetchAll();
+	try {
 
-	$ratings = $this->MenuUtil->getRatings($data);
+		//retrieve the menu details
+		$selectStmt = $this->db->select()->from('menus')->where('id','=',$args['menu_id']);
+		$selectStmt = $selectStmt->execute(false);
+		$data = $selectStmt->fetchAll();
+		
+		$ratings = $this->MenuUtil->getRatings($data);
+		
+		return $response->withJson(array("status" => true, "data" => $data), 200);		
+		
+	} catch (Exception $e) {
+		
+		return $response->withJson(array("status" => false, "message" => $e->getMessage()), 500);
+		
+	}
 
-	return $response->withJson(array("status" => true, "data" => $data), 200);
 
 });

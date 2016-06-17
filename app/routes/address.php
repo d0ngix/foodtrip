@@ -3,20 +3,19 @@
 /* *
  * Get User Addresses
  * */
-$app->get('/address[/{uuid}]', function ( $request, $response, $args) {
+$app->get('/address/{uuid}', function ( $request, $response, $args) {
 
 	//check user if valid
 	$userId = $this->UserUtil->checkUser($args['uuid']);
 	if ( ! $userId ) {
-		$response->withJson(array("status" => false, "message" => "Invalid User"), 404);
-		return $response;
+		return$response->withJson(array("status" => false, "message" => "Invalid User"), 404);
 	}
 
 	try {
 		
-		$selectUserStatement = $this->db->select()->from('addresses')->where('user_uuid','=',$args['uuid']);
-		$stmt = $selectUserStatement->execute(false);
-		$data = $stmt->fetchAll();
+		$selectStatement = $this->db->select()->from('addresses')->where('user_id','=',$userId);
+		$selectStatement = $selectStatement->execute(false);
+		$data = $selectStatement->fetchAll();
 		
 		return $response->withJson(array("status" => true, "data" => $data), 200);		
 		
@@ -132,8 +131,7 @@ $app->delete('/address/{user_uuid}/{id}', function ( $request, $response, $args)
 	//check user if valid
 	$userId = $this->UserUtil->checkUser($args['user_uuid']);
 	if ( ! $userId ) {
-		$response->withJson(array("status" => false, "message" => "Invalid User"),500);
-		return $response;
+		return $response->withJson(array("status" => false, "message" => "Invalid User"),500);
 	}
 
 	try {
