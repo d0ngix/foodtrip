@@ -17,7 +17,7 @@ $app->get('/user[/{uuid}]', function ( $request, $response, $args) {
 		if (!empty($data['photo']))
 			$data['photo'] = json_decode($data['photo'],true);
 		
-		return $response->withJson(array('status'=>false, 'data'=>$data) , 200);		
+		return $response->withJson(array('status'=>true, 'data'=>$data) , 200);		
 		
 	} catch (Exception $e) {
 		

@@ -5,10 +5,15 @@
  * */
 $app->post('/transac/{user_uuid}', function ($request, $response, $args) {
 	
-	$dataBody = $request->getParsedBody();
+	$data = $request->getParsedBody();
+	
+	//check for data, return false if empty
+	if ( empty($data) ) {
+		return $response->withJson(array("status" => false, "message" => 'Empty Form!'), 404);
+	}	
 	
 	//check items
-	if (empty($dataBody['items'])) {
+	if (empty($data['items'])) {
 		$response->withJson(array("status" => false, "message" => "No Item(s) Found!") , 404);
 		return $response;		
 	}  
@@ -19,10 +24,10 @@ $app->post('/transac/{user_uuid}', function ($request, $response, $args) {
 		$response->withJson(array("status" => false, "message" =>"Invalid User!"), 404);
 		return $response;
 	}
-	$dataBody['transac']['user_id'] = $userId;
+	$data['transac']['user_id'] = $userId;
 
 	//check given price
-	$blnPrice = $this->TransacUtil->checkPrices($dataBody['items']);
+	$blnPrice = $this->TransacUtil->checkPrices($data['items']);
 	if(!$blnPrice) {
 		$response->withJson(array("status" => false, "message" =>"Price Changes Detected!"), 404);
 		return $response;		
@@ -30,42 +35,42 @@ $app->post('/transac/{user_uuid}', function ($request, $response, $args) {
 	
 	//get the sub_total (add all amount in items)
 	$fltItemTotal = 0;
-	foreach ( $dataBody['items'] as $value ) {
+	foreach ( $data['items'] as $value ) {
 		$fltTotal = $value['qty'] * $value['price'];
 		if (!empty($value['discount']))
 			$fltTotal = $fltTotal - $value['discount'];
 
 		$fltItemTotal += $fltTotal;
 	}	
-	$dataBody['transac']['sub_total'] = $fltItemTotal;
+	$data['transac']['sub_total'] = $fltItemTotal;
 	
 	//check delivery cost
-	if (!empty($dataBody['transac']['address_id'])){
-		$blnDeliveryCost = $this->TransacUtil->checkDeliveryCost($dataBody['transac']['address_id'], $dataBody['transac']['delivery_cost']); 
+	if (!empty($data['transac']['address_id'])){
+		$blnDeliveryCost = $this->TransacUtil->checkDeliveryCost($data['transac']['address_id'], $data['transac']['delivery_cost']); 
 		if (!$blnDeliveryCost)
 			return $response->withJson(array("status" => false, "message" =>"Delivery Cost Not Matched!"), 404);
 	}
 	
 	//check promo code if exist or not expired. return the promo discount amount
-	if (!empty($dataBody['transac']['promo_code'])) {
-		$blnDiscount = $this->TransacUtil->checkPromoCode($dataBody['transac']['promo_code'], $dataBody['transac']['discount']);
+	if (!empty($data['transac']['promo_code'])) {
+		$blnDiscount = $this->TransacUtil->checkPromoCode($data['transac']['promo_code'], $data['transac']['discount']);
 		if (!$blnDiscount)
 			return $response->withJson(array("status" => false, "message" =>"Discount Not Matched!"), 404);		
 	}
 	
 	//get the total amount
-	$dataBody['transac']['total_amount'] = $dataBody['transac']['sub_total'] + $dataBody['transac']['delivery_cost'] - $dataBody['transac']['discount']; 
+	$data['transac']['total_amount'] = $data['transac']['sub_total'] + $data['transac']['delivery_cost'] - $data['transac']['discount']; 
 	
 	//set uuid	
-	//$dataBody['transac']['uuid'] = uniqid();
+	//$data['transac']['uuid'] = uniqid();
 	
 	try {
 		
-		$dataBody['transac']['uuid'] = uniqid();
+		$data['transac']['uuid'] = uniqid();
 		
 		//insert into transactions table
-		$arrFields = array_keys($dataBody['transac']);
-		$arrValues = array_values($dataBody['transac']);
+		$arrFields = array_keys($data['transac']);
+		$arrValues = array_values($data['transac']);
 		$insertStatement = $this->db->insert( $arrFields )
 								->into('transactions')
 								->values($arrValues);
@@ -73,7 +78,7 @@ $app->post('/transac/{user_uuid}', function ($request, $response, $args) {
 		$strUuid = $this->db->select(array('uuid'))->from('transactions')->where('id','=',$intTransacId)->execute(false)->fetch();
 		
 		//insert into transaction_items
-		foreach ( $dataBody['items'] as $value ) {
+		foreach ( $data['items'] as $value ) {
 			
 			$value['transaction_id'] = $intTransacId; 
 			
@@ -252,6 +257,66 @@ $app->put('/transac/order/item/{user_uuid}/{trasac_uuid}', function($request, $r
 	
 });
 
+/* *
+ * Update Order Transactions details
+ * - address_id
+ * - delivery_man_id
+ * - status = 1 = waiting-for-payment; 2 = dispatched; 3 = delivered; 4 = completed; 5 = archived;
+ * - transac_ref
+* */
+$app->put('/transac/order/{user_uuid}/{trasac_uuid}', function($request, $response, $args){
+
+	//allowed field to be updated
+	$arrAllowedField = array('delivery_man_id','address_id','status','transac_ref');
+	
+	$data = $request->getParsedBody();
+	
+	//check user if valid
+	$userId = $this->UserUtil->checkUser($args['user_uuid']);
+	if ( ! $userId ) {
+		return $response->withJson(array("status" => false, "message" =>"Invalid User"), 404);
+	}
+
+	//check transac if valid
+	$arrTransac = $this->TransacUtil->checkTransac($args['trasac_uuid'], $userId);
+	if ( ! $arrTransac ) {
+		return $response->withJson(array("status" => false, "message" =>"No Record(s) Found!"), 404);
+	}
+
+
+	try {
+		
+		//make sure ONLY accept delivery_man_id / status / address_id		
+		foreach ($data as $k => $v) {
+			if (!in_array($k, $arrAllowedField))
+				return $response->withJson(array("status" => false, "message" => "Update Not Allowed! - " . $k), 404);
+		} 
+
+		$updateStmt = $this->db->update( $data )
+								->table('transactions')
+								->where('id','=',$arrTransac['id']);
+		$intCount = $updateStmt->execute();
+				
+
+		//if no rows updated
+		if ( ! $intCount ) {
+			return $response->withJson(array("status" => false, "message" =>"No Record(s) Found!"), 404);
+		}
+
+		//select the updated items
+		$selectStmt = $this->db->select()->from('transactions')->where('id','=',$arrTransac['id']);
+		$selectStmt = $selectStmt->execute();
+		$arrResult = $selectStmt->fetchAll();
+
+		return $response->withJson(array("status" => true, "data" =>$arrResult), 200);
+
+	} catch (Exception $e) {
+
+		return $response->withJson(array("status" => false, "message" =>$e->getMessage()), 500);
+
+	}
+
+});
 
 //Get promo discount
 

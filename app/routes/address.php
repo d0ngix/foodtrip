@@ -36,8 +36,7 @@ $app->post('/address/{user_uuid}', function ( $request, $response, $args) {
 	
 	//check for data, return false if empty
 	if ( empty($data) ) {
-		$response->withJson(array("status" => false, "message" => 'Empty Form!'), 404);
-		return $response;
+		return $response->withJson(array("status" => false, "message" => 'Empty Form!'), 404);
 	}
 
 	//check user if valid
