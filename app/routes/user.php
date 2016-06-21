@@ -1,8 +1,9 @@
 <?php
-//use Model\User;
-//use Controller\UserController;
 
-$app->get('/user[/{uuid}]', function ( $request, $response, $args) {
+/* *
+ * Get User Details
+ * */
+$app->get('/user/{uuid}', function ( $request, $response, $args) {
 	
 	try {
 
@@ -17,6 +18,9 @@ $app->get('/user[/{uuid}]', function ( $request, $response, $args) {
 		if (!empty($data['photo']))
 			$data['photo'] = json_decode($data['photo'],true);
 		
+		//remove the password
+		unset($data['password']);
+		
 		return $response->withJson(array('status'=>true, 'data'=>$data) , 200);		
 		
 	} catch (Exception $e) {
@@ -24,12 +28,12 @@ $app->get('/user[/{uuid}]', function ( $request, $response, $args) {
 		return $response->withJson(array("status" => false, "message" => $e->getMessage()), 200);
 		
 	}
-	
-
 
 });
 
-//Adding new user
+/* *
+ * Adding new user
+ * */
 $app->post('/user', function ( $request, $response, $args) {
 	
 	$data = $request->getParsedBody();

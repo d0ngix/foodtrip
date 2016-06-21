@@ -261,7 +261,7 @@ $app->put('/transac/order/item/{user_uuid}/{trasac_uuid}', function($request, $r
  * Update Order Transactions details
  * - address_id
  * - delivery_man_id
- * - status = 1 = waiting-for-payment; 2 = dispatched; 3 = delivered; 4 = completed; 5 = archived;
+ * - status = 0 - cancelled; 1 = waiting-for-payment; 2 = dispatched; 3 = delivered; 4 = completed; 5 = archived;
  * - transac_ref
 * */
 $app->put('/transac/order/{user_uuid}/{trasac_uuid}', function($request, $response, $args){
