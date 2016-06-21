@@ -34,7 +34,7 @@ $app->get('/user/{uuid}', function ( $request, $response, $args) {
 /* *
  * Adding new user
  * */
-$app->post('/user', function ( $request, $response, $args) {
+$app->post('/user/add', function ( $request, $response, $args) {
 	
 	$data = $request->getParsedBody();
 	
