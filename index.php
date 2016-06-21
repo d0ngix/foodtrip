@@ -100,7 +100,10 @@ $container['TransacUtil'] = function ($c) {
 $app->add(function (ServerRequestInterface $request, ResponseInterface $response, callable $next) {
 	// Use the PSR 7 $request object
 	
-	var_dump($request->getHeaders());die;
+	var_dump($request->getMethod());
+	var_dump('POST: ' . $request->isPost());
+	var_dump('POST: ' . $request->isGet());
+	die;
 	//Logging Here
     //Sampler logs
 	$this->logger->addInfo();
