@@ -48,7 +48,6 @@ $app->post('/user', function ( $request, $response, $args) {
 	//search email and number if it exist
 	$isExist = $this->db->select(array('email'))->from('users')->where('email','=',$data['email']);
 	$isExist = $isExist->execute(false);
-	
 	if (!empty($isExist->fetch())) {
 		$response->withJson(array('status'=>false,"message"=>'User already exist!'),500);
 		return $response;		
