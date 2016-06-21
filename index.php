@@ -102,7 +102,7 @@ $app->add(function (ServerRequestInterface $request, ResponseInterface $response
 	
 	var_dump($request->getMethod());
 	var_dump('POST: ' . $request->isPost());
-	var_dump('POST: ' . $request->isGet());
+	var_dump('GET: ' . $request->isGet());
 	die;
 	//Logging Here
     //Sampler logs
