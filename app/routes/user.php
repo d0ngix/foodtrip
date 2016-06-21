@@ -3,7 +3,7 @@
 /* *
  * Get User Details
  * */
-$app->get('/user/get/{uuid}', function ( $request, $response, $args) {
+$app->get('/user/{uuid}', function ( $request, $response, $args) {
 	
 	try {
 
@@ -12,7 +12,7 @@ $app->get('/user/get/{uuid}', function ( $request, $response, $args) {
 		$data = $stmt->fetch();
 		
 		if (!$data)
-			return $response->withJson(array('status'=>false, 'message'=>'User Not Found!'), 404); 
+			return $response->withJson(array('status'=>false, 'message'=>'User Not Found!'), 200); 
 		
 		//un-json the photo details
 		if (!empty($data['photo']))
@@ -34,7 +34,7 @@ $app->get('/user/get/{uuid}', function ( $request, $response, $args) {
 /* *
  * Adding new user
  * */
-$app->post('/user/add', function ( $request, $response, $args) {
+$app->post('/user', function ( $request, $response, $args) {
 	
 	$data = $request->getParsedBody();
 	
