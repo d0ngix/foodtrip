@@ -3,7 +3,7 @@
 /* *
  * Get User Details
  * */
-$app->get('/user/{uuid}', function ( $request, $response, $args) {
+$app->get('/user/get/{uuid}', function ( $request, $response, $args) {
 	
 	try {
 
@@ -12,7 +12,7 @@ $app->get('/user/{uuid}', function ( $request, $response, $args) {
 		$data = $stmt->fetch();
 		
 		if (!$data)
-			return $response->withJson(array('status'=>false, 'message'=>'Usre Not Found!'), 200); 
+			return $response->withJson(array('status'=>false, 'message'=>'User Not Found!'), 404); 
 		
 		//un-json the photo details
 		if (!empty($data['photo']))
