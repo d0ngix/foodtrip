@@ -1,4 +1,9 @@
 <?php
+
+var_dump($_SERVER);
+var_dump($_POST);
+die;
+
 use Psr\Http\Message\ServerRequestInterface;
 use Psr\Http\Message\ResponseInterface;
 
@@ -100,10 +105,10 @@ $container['TransacUtil'] = function ($c) {
 $app->add(function (ServerRequestInterface $request, ResponseInterface $response, callable $next) {
 	// Use the PSR 7 $request object
 	
-	var_dump($request->getMethod());
-	var_dump('POST: ' . $request->isPost());
-	var_dump('GET: ' . $request->isGet());
-	die;
+// 	var_dump($request->getMethod());
+// 	var_dump('POST: ' . $request->isPost());
+// 	var_dump('GET: ' . $request->isGet());
+// 	die;
 	//Logging Here
     //Sampler logs
     /*
