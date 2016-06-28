@@ -8,7 +8,7 @@ $app->get('/address/{uuid}', function ( $request, $response, $args) {
 	//check user if valid
 	$userId = $this->UserUtil->checkUser($args['uuid']);
 	if ( ! $userId ) {
-		return$response->withJson(array("status" => false, "message" => "Invalid User"), 404);
+		return $response->withJson(array("status" => false, "message" => "Invalid User"), 404);
 	}
 
 	try {

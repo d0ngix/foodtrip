@@ -22,8 +22,6 @@ $app->post('/menu/{vendor_uuid}', function($request, $response, $args){
 	unset($data['vendor_uuid']);
 	$data['vendor_id'] = $vendorId;
 
-
-
 	$arrFields = array_keys($data);
 	$arrValues = array_values($data);
 
@@ -112,22 +110,33 @@ $app->get('/menu/{menu_id}', function ($request, $response, $args) {
 /* *
  * Rate a Menu w/ Comment
  * */
-$app->post('/menu/rate/{user_uuid}', function($request, $response, $args){
+$app->post('/menu/rate/{menu_id}', function($request, $response, $args){
 
 	$data = $request->getParsedBody();
 
 	//check user if valid
-	$userId = $this->UserUtil->checkUser($args['user_uuid']);
+	$userId = $this->UserUtil->checkUser($data['user_uuid']);
 	if ( ! $userId ) {
-		$response->withJson("Invalid User" ,500);
-		return $response;
+		return $response->withJson(array("status" => false, "message" => "Invalid User!"), 404);
 	}
 	$data['user_id'] = $userId;
+	unset($data['user_uuid']);
 	
+	//check if user has an order of the menu item
+	$selectStmt = $this->db->select(array('transaction_items.*'))->from('transactions')->whereMany(array('user_id' => $userId, 'menu_id' => $args['menu_id']), '=')
+									->join('transaction_items', 'transaction_items.transaction_id', '=', 'transactions.id');
+	$selectStmt = $selectStmt->execute();
+	$arrResult = $selectStmt->fetchAll();
+	if ( ! $arrResult ) {
+		return $response->withJson(array("status" => false, "message" => "No Record(s) Found!"),404);
+	}	
+			
 	//set rating
 	$arrRatings = array( 1 => 'one', 2 => 'two', 3 => 'three', 4 => 'four', 5 => 'five');
 	$data[$arrRatings[$data['rate']]] = 1;
 	unset($data['rate']);	
+	
+	$data['menu_id'] = $args['menu_id'];
 	
 	$arrFields = array_keys($data);
 	$arrValues = array_values($data);
@@ -141,7 +150,7 @@ $app->post('/menu/rate/{user_uuid}', function($request, $response, $args){
 		$insertId = $insertStatement->execute(true);
 
 		//retrieve the menu details
-		$selectStmt = $this->db->select()->from('menus')->where('id','=',$data['menu_id']);
+		$selectStmt = $this->db->select()->from('menus')->where('id','=',$args['menu_id']);
 		$selectStmt = $selectStmt->execute(false);
 		$data = $selectStmt->fetchAll();
 

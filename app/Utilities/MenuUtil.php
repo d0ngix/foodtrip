@@ -119,5 +119,12 @@ class MenuUtil
 		}
 
 	}
+	
+	
+	public function checkUserOrder($intMenuId, $intUserId) {
+		
+		
+		
+	}
 
 }
