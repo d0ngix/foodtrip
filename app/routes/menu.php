@@ -156,6 +156,12 @@ $app->post('/menu/rate/{menu_id}', function($request, $response, $args){
 
 		$blnRatings = $this->MenuUtil->getRatings($data);
 
+		$data = array(
+			'id' => $data[0]['id'],
+			'name' => $data[0]['name'],
+			'ratings' => $data[0]['ratings']
+		);
+
 		return $response->withJson(array("status" => true, "data" => $data), 200);
 
 	} catch (Exception $e) {
