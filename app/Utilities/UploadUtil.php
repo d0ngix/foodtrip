@@ -123,7 +123,7 @@ class UploadUtil
 		$file = new \Upload\File('photo', $storage);
 
 		// Optionally you can rename the file on upload
-		$new_filename = $requestData['menu_id']."_".$file->getName();
+		$new_filename = $requestData['menu_id']."_". preg_replace('/\s+/', '', $file->getName());
 		$file->setName($new_filename);
 
 		// Validate file upload
@@ -153,8 +153,8 @@ class UploadUtil
 
 			// INSERT INTO users ( id , usr , pwd ) VALUES ( ? , ? , ? )
 			$insertStatement = $this->db->insert( $arrFields )
-			->into('menu_images')
-			->values($arrValues);
+										->into('menu_images')
+										->values($arrValues);
 			$insertId = $insertStatement->execute(true);
 
 		} catch (Exception $e) {
@@ -163,6 +163,9 @@ class UploadUtil
 
 		}
 
+		$filePath = $this->imgPath . $new_filename . "." . $file->getExtension();
+		if(file_exists($filePath)) unlink($filePath);		
+		
 		return $file;
 
 	}
