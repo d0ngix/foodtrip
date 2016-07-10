@@ -21,6 +21,10 @@ $app->post('/menu/{vendor_uuid}', function($request, $response, $args){
 	//remove vendor_uuid
 	unset($data['vendor_uuid']);
 	$data['vendor_id'] = $vendorId;
+	
+	if (!empty($data['add_ons'])) {
+		$data['add_ons'] = json_encode($data['add_ons']);
+	}
 
 	$arrFields = array_keys($data);
 	$arrValues = array_values($data);
@@ -66,11 +70,21 @@ $app->get('/menu/all/{vendor_uuid}', function ($request, $response, $args) {
 		$stmt = $selectStatement->execute(false);
 		$data = $stmt->fetchAll();
 
-		$blnRatings = $this->MenuUtil->getRatings($data);
-
-		if (!empty($data))
-			$data = $this->MenuUtil->getMenuImages($data);
-
+		if (!empty($data)) {
+			//un-json the add_ons details
+			foreach ($data as $v) {
+				if (!empty($v['add_ons'])) {
+					$v['add_ons'] = json_decode($v['add_ons'],true);
+				}
+				
+				$arrNewResult[] = $v;
+			}
+			$data = $arrNewResult;
+			
+			$blnRatings = $this->MenuUtil->getRatings($data);
+			$data = $this->MenuUtil->getMenuImages($data);			
+		}
+		
 		return $response->withJson(array("status" => true, "data" => $data), 200);
 
 	} catch (Exception $e) {
@@ -179,11 +193,11 @@ $app->get('/menu/rate/{menu_id}', function ($request, $response, $args) {
 	try {
 
 		//retrieve the menu details
-		$selectStmt = $this->db->select()->from('menus')->where('id','=',$args['menu_id']);
+		$selectStmt = $this->db->select(array('id','vendor_id','name'))->from('menus')->where('id','=',$args['menu_id']);
 		$selectStmt = $selectStmt->execute(false);
-		$data = $selectStmt->fetchAll();
+		$data = $selectStmt->fetch();
 		
-		$ratings = $this->MenuUtil->getRatings($data);
+		$ratings = $this->MenuUtil->getFeedback($data);
 		
 		return $response->withJson(array("status" => true, "data" => $data), 200);		
 		

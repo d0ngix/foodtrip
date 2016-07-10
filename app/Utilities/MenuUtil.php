@@ -63,7 +63,7 @@ class MenuUtil
 			$lastKey = key($dataRatings);
 
 			$prevMenuId = $intFive = $intFour = $intThree = $intTwo = $intOne = null;
-				
+
 			foreach ($dataRatings as $key => $value ) {
 
 				extract($value);//extract = array('id' => 1) = $id = 1
@@ -120,6 +120,46 @@ class MenuUtil
 
 	}
 	
+	public function getFeedback (&$data) {
+
+		if (empty($data)) return false;
+	
+		try {
+	
+			$selectStmt = $this->db->select()->from('menu_ratings')->where('menu_id', '=', $data['id'])->orderBy('id','ASC');
+			$selectStmt = $selectStmt->execute();
+			$dataRatings = $selectStmt->fetchAll();
+
+			//return false if menu has no ratings
+			if (empty($dataRatings)) return false;
+	
+			foreach ($dataRatings as $key => $value ) {
+
+				extract($value);
+				
+				if ($one) $rate = 1;
+				if ($two) $rate = 2;
+				if ($three) $rate = 3;
+				if ($four) $rate = 4;
+				if ($five) $rate = 5;
+								
+				$arrFeedback[$value['menu_id']][] = ['rate' => $rate, 'comment' => $value['comment'], 'user_name' => $value['user_name'], 'created' => $value['created']];
+
+			}
+			
+			$data['count'] = count($dataRatings);
+			$data['feedback'] = $arrFeedback;
+	
+			return true;
+	
+	
+		} catch (Exception $e) {
+	
+			return $e->getMessage();
+	
+		}
+	
+	}	
 	
 	public function checkUserOrder($intMenuId, $intUserId) {
 		

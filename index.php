@@ -164,6 +164,9 @@ require 'app/routes/transac.php';
 //API - vendor
 require 'app/routes/provider.php';
 
+//API - vendor address
+require 'app/routes/provider_address.php';
+
 //API - uploads
 $app->post('/uploads[/{type}]', function ($request, $response, $args) {
 
