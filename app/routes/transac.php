@@ -105,7 +105,6 @@ $app->post('/transac/{user_uuid}', function ($request, $response, $args) {
 
 });
 
-
 /* *
  * Get Single Orders "order"
  * */
@@ -207,7 +206,6 @@ $app->get('/transac/orders/{user_uuid}[/{status}]', function($request, $response
 	}
 
 });
-
 
 /* *
  * Update transaction_item status 

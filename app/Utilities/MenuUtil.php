@@ -126,13 +126,21 @@ class MenuUtil
 	
 		try {
 	
-			$selectStmt = $this->db->select()->from('menu_ratings')->where('menu_id', '=', $data['id'])->orderBy('id','ASC');
+			$selectStmt = $this->db->select(array('menu_ratings.*', 'users.first_name'))->from('menu_ratings')->where('menu_id', '=', $data['id'])
+											->join('users','users.id','=','menu_ratings.user_id')->orderBy('menu_ratings.id','ASC');
 			$selectStmt = $selectStmt->execute();
 			$dataRatings = $selectStmt->fetchAll();
 
 			//return false if menu has no ratings
 			if (empty($dataRatings)) return false;
 	
+			reset($dataRatings);
+			$firstKey = key($dataRatings);
+			end($dataRatings);
+			$lastKey = key($dataRatings);			
+			
+			$prevMenuId = $intFive = $intFour = $intThree = $intTwo = $intOne = null;
+			
 			foreach ($dataRatings as $key => $value ) {
 
 				extract($value);
@@ -143,10 +151,34 @@ class MenuUtil
 				if ($four) $rate = 4;
 				if ($five) $rate = 5;
 								
-				$arrFeedback[$value['menu_id']][] = ['rate' => $rate, 'comment' => $value['comment'], 'user_name' => $value['user_name'], 'created' => $value['created']];
+				$arrFeedback[$value['menu_id']][] = [
+						'rate' => $rate, 
+						'comment' => $value['comment'], 
+						'first_name' => $value['first_name'], 
+						'created' => $value['created']
+				];
+				
+				//get the overall ratings
+				if ( $prevMenuId === $menu_id || $key === $firstKey) {
+						
+					$intFive += $five;
+					$intFour += $four;
+					$intThree += $three;
+					$intTwo += $two;
+					$intOne += $one;
+
+					$prevMenuId = $menu_id;
+						
+					if ($key !== $lastKey) continue;
+						
+				}
+
+				//weighted average
+				$ratings = ( 5 * $intFive + 4 * $intFour + 3 * $intThree + 2 * $intTwo + 1 * $intOne ) / ( $intFive + $intFour + $intThree + $intTwo + $intOne );
 
 			}
 			
+			$data['ratings'] = $ratings;
 			$data['count'] = count($dataRatings);
 			$data['feedback'] = $arrFeedback;
 	

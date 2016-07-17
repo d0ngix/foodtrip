@@ -34,6 +34,12 @@ require 'vendor/autoload.php';
  **********************************************************************/
 $app = new Slim\App(["settings" => $config]);
 
+
+// $app->add(new \Slim\Middleware\JwtAuthentication([
+// 		"secret" => "supersecretkeyyoushouldnotcommittogithub"
+// 		]));
+
+
 //Getting the containers
 $container = $app->getContainer();
 

@@ -2,7 +2,7 @@
 /* *
  * Add New Menu
  * */
-$app->post('/menu/{vendor_uuid}', function($request, $response, $args){
+$app->post('/menu/main/{vendor_uuid}', function($request, $response, $args){
 
 	$data = $request->getParsedBody();
 
@@ -66,7 +66,7 @@ $app->get('/menu/all/{vendor_uuid}', function ($request, $response, $args) {
 
 	try {
 
-		$selectStatement = $this->db->select()->from('menus')->whereMany(array('vendor_id' => $vendorId, 'is_active' => 1), '=');
+		$selectStatement = $this->db->select()->from('menus')->whereMany(array('vendor_id' => $vendorId, 'is_active' => 1, 'deleted' => 0), '=');
 		$stmt = $selectStatement->execute(false);
 		$data = $stmt->fetchAll();
 
@@ -209,3 +209,75 @@ $app->get('/menu/rate/{menu_id}', function ($request, $response, $args) {
 
 
 });
+
+/* *
+ * Delete Menu - soft delete
+ * */
+$app->delete('/menu/{id}', function($request, $response, $args) {
+	
+	try {
+		
+		//check if the user owns the address_id
+		$selectStmt = $this->db->select()->from('menus')->where('id','=',$args['id'])->execute();
+		$arrAddress = $selectStmt->fetch();
+		if(!$arrAddress) {
+			return $response->withJson(array("status" => false, "message" => "Menu Not Found!"), 404);
+		}		
+		
+		//update deleted field = 1
+		$deleteStatement = $this->db->update(array('deleted'=>1))
+									->table('menus')
+									->where('id','=',$args['id']);
+
+		$affectedRows = $deleteStatement->execute();
+
+		return $response->withJson(array("status" => true, "data" => $affectedRows), 200);
+
+	} catch (Exception $e) {
+
+		return $response->withJson(array("status" => false, "message" => $e->getMessage()), 500);
+
+	}
+	
+});
+
+/* *
+ * Add Menu add-ons
+ * */
+$app->post('/menu/add_ons/', function($request, $response, $args){
+	
+	$data = $request->getParsedBody();
+	
+	if (empty($data)) {
+		return $response->withJson(array("status" => false, "message" => 'Empty Form!'), 404);
+	}
+	
+	try {
+		
+		$arrFields = array_keys($data);
+		$arrValues = array_values($data);
+		
+		$insertStatement = $this->db->insert($arrFields)
+									->into('menu_add_ons')
+									->values($arrValues);
+		$insertId = $insertStatement->execute(true);
+		
+		return $response->withJson(array("status" => true, "data" => $insertId), 200);
+		
+	} catch (Exception $e) {
+
+		return $response->withJson(array("status" => false, "message" => $e->getMessage()), 500);
+		
+	}
+	
+	var_dump($data);die;
+	
+});
+
+/* *
+ * Update Menu add-ons
+ * */
+
+/* *
+ * Update Menu
+ * */
