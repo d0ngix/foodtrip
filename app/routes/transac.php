@@ -33,15 +33,30 @@ $app->post('/transac/{user_uuid}', function ($request, $response, $args) {
 		return $response;		
 	}
 	
-	//get the sub_total (add all amount in items)
+	//get the sub_total (add all amount in items as well as the add_ons total)
 	$fltItemTotal = 0;
 	foreach ( $data['items'] as $value ) {
 		$fltTotal = $value['qty'] * $value['price'];
 		if (!empty($value['discount']))
 			$fltTotal = $fltTotal - $value['discount'];
 
-		$fltItemTotal += $fltTotal;
+		//Calculate the add_ons total
+		if(!empty($value['add_ons'])) {
+			$fltAddOnTotal = 0;
+			foreach ( $value['add_ons'] as $v ) {
+				$fltAddOnTotal += ($v['price'] * $v['qty']);
+			}
+			
+			$value['add_ons'] = json_encode($value['add_ons']);
+		}		
+		
+		$value['total_amount'] = $fltTotal + $fltAddOnTotal;
+		
+		$arrNewDataItem[] = $value; 
+		
+		$fltItemTotal += $value['total_amount'];
 	}	
+	$data['items'] = $arrNewDataItem;
 	$data['transac']['sub_total'] = $fltItemTotal;
 	
 	//check delivery cost
@@ -61,11 +76,9 @@ $app->post('/transac/{user_uuid}', function ($request, $response, $args) {
 	//get the total amount
 	$data['transac']['total_amount'] = $data['transac']['sub_total'] + $data['transac']['delivery_cost'] - $data['transac']['discount']; 
 	
-	//set uuid	
-	//$data['transac']['uuid'] = uniqid();
-	
 	try {
 		
+		//set uuid		
 		$data['transac']['uuid'] = uniqid();
 		
 		//insert into transactions table
@@ -81,13 +94,10 @@ $app->post('/transac/{user_uuid}', function ($request, $response, $args) {
 		foreach ( $data['items'] as $value ) {
 			
 			$value['transaction_id'] = $intTransacId; 
-			
-			//get total amount each item
-			$value['total_amount'] = $value['qty'] * $value['price'] - $value['discount'];
-			
+					
 			$arrFields = array_keys($value);
 			$arrValues = array_values($value);
-
+			
 			//insert into items table
 			$insertStatement = $this->db->insert( $arrFields )
 										->into('transaction_items')
@@ -125,18 +135,23 @@ $app->get('/transac/order/{user_uuid}/{trasac_uuid}', function($request, $respon
 	try {
 		
 		//get items on this transactions
-		$selectStmt = $this->db->select()->from('transaction_items')->where('transaction_id','=',$arrTransac['id']);
+		$selectStmt = $this->db->select(array('transaction_items.*','menus.name'))->from('transaction_items')->where('transaction_id','=',$arrTransac['id']);
 		$selectStmt = $selectStmt->join('menus', 'transaction_items.menu_id','=','menus.id');
 		$selectStmt = $selectStmt->execute();
 		$arrResult = $selectStmt->fetchAll();
-		
-		//get menu images
-		if (!empty($arrResult))
-			$arrResult = $this->MenuUtil->getMenuImages($arrResult);
-		
-		$arrTransac['items'] = $arrResult;
-		
-		return $response->withJson(array("status" => true, "message" =>$arrTransac), 200);		
+
+		if (!empty($arrResult)) {
+			foreach ($arrResult as $value) {
+				if (!empty($value['add_ons'])) 
+					$value['add_ons'] = json_decode($value['add_ons']);
+				
+				$arrNewResult[] = $value;
+			}			
+
+			$arrTransac['items'] = $arrNewResult;
+		}			
+			
+		return $response->withJson(array("status" => true, "data" =>$arrTransac), 200);		
 		
 	} catch (Exception $e) {
 		
