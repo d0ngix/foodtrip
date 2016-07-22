@@ -151,7 +151,7 @@ class MenuUtil
 				if ($four) $rate = 4;
 				if ($five) $rate = 5;
 								
-				$arrFeedback[$value['menu_id']][] = [
+				$arrFeedback[] = [
 						'rate' => $rate, 
 						'comment' => $value['comment'], 
 						'first_name' => $value['first_name'], 

@@ -34,12 +34,6 @@ require 'vendor/autoload.php';
  **********************************************************************/
 $app = new Slim\App(["settings" => $config]);
 
-
-// $app->add(new \Slim\Middleware\JwtAuthentication([
-// 		"secret" => "supersecretkeyyoushouldnotcommittogithub"
-// 		]));
-
-
 //Getting the containers
 $container = $app->getContainer();
 
@@ -103,6 +97,19 @@ $container['TransacUtil'] = function ($c) {
 /** *******************************************************************
  * Middleware  - START
  **********************************************************************/
+// $container["jwt"] = function ($container) {
+//     return new StdClass;
+// };
+
+// $app->add(new \Slim\Middleware\JwtAuthentication([
+//     "secret" => "supersecretkeyyoushouldnotcommittogithub",
+//     "callback" => function ($request, $response, $arguments) use ($container) {
+//         $container["jwt"] = $arguments["decoded"];
+//         var_dump($request);die;
+//     }
+// ]));
+
+
 $app->add(function (ServerRequestInterface $request, ResponseInterface $response, callable $next) {
 	// Use the PSR 7 $request object
 	
