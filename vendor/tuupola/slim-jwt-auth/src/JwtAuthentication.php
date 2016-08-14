@@ -1,7 +1,7 @@
 <?php
 
 /*
- * This file is part of Slim JSON Web Token Authentication middleware
+ * This file is part of PSR-7 JSON Web Token Authentication middleware
  *
  * Copyright (c) 2015-2016 Mika Tuupola
  *
@@ -131,7 +131,7 @@ class JwtAuthentication
             $params = ["decoded" => $decoded];
             if (false === $this->options["callback"]($request, $response, $params)) {
                 return $this->error($request, $response, [
-                    "message" => $this->message || "Callback returned false"
+                    "message" => $this->message ? $this->message : "Callback returned false"
                 ])->withStatus(401);
             }
         }

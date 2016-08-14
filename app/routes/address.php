@@ -59,11 +59,11 @@ $app->post('/address/{user_uuid}', function ( $request, $response, $args) {
 									->values($arrValues);
 		$insertId = $insertStatement->execute(true);
 		
-		$selectStmt = $this->db->select()->from('addresses')->where('id','=',$insertId);
-		$selectStmt = $selectStmt->execute();
-		$arrResult = $selectStmt->fetch();
+// 		$selectStmt = $this->db->select()->from('addresses')->where('id','=',$insertId);
+// 		$selectStmt = $selectStmt->execute();
+// 		$arrResult = $selectStmt->fetch();
 
-		return $response->withJson(array("status" => true, "data" => $arrResult), 200);
+		return $response->withJson(array("status" => true, "data" => $insertId), 200);
 
 	} catch (PDOException $e) {
 

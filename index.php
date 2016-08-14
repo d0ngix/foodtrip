@@ -1,7 +1,7 @@
 <?php
 use Psr\Http\Message\ServerRequestInterface;
 use Psr\Http\Message\ResponseInterface;
-
+use \Firebase\JWT\JWT;
 
 //use Model\User;
 //use Controller\UserController;
@@ -48,6 +48,11 @@ $container['logger'] = function ($c) {
 	return $logger;
 };
 
+//Adding JWT to Container
+$container["jwt"] = function ($container) {
+	return new JWT;
+};
+
 //Adding Database connection to Container
 $container['db'] = function ($c) {	
 // 	$dsn = 'mysql:host=localhost;dbname=foodtrip;charset=utf8';
@@ -65,7 +70,7 @@ $container['db'] = function ($c) {
 //Inject User Utility Class
 use Utilities\UserUtil;
 $container['UserUtil'] = function ($c) {
-	$utilities = new UserUtil($c->db);
+	$utilities = new UserUtil($c->db, $c->jwt);
 	return $utilities;
 };
 
@@ -97,17 +102,36 @@ $container['TransacUtil'] = function ($c) {
 /** *******************************************************************
  * Middleware  - START
  **********************************************************************/
-// $container["jwt"] = function ($container) {
-//     return new StdClass;
-// };
 
-// $app->add(new \Slim\Middleware\JwtAuthentication([
-//     "secret" => "supersecretkeyyoushouldnotcommittogithub",
-//     "callback" => function ($request, $response, $arguments) use ($container) {
-//         $container["jwt"] = $arguments["decoded"];
-//         var_dump($request);die;
-//     }
-// ]));
+$app->add(new \Slim\Middleware\JwtAuthentication([
+    "secret" => "supersecretkeyyoushouldnotcommittogithub", //TODO: Use https://github.com/vlucas/phpdotenv
+    "secure" => true,
+    "relaxed" => ["localhost", "foodtrip.herokuapp.com"],
+	//"logger" => $logger,
+		
+	"rules" => [
+		new \Slim\Middleware\JwtAuthentication\RequestPathRule([
+			"path" => "/",
+			"passthrough" => ["/user/login","/user/add"],
+		]),
+		/*
+		new \Slim\Middleware\JwtAuthentication\RequestMethodRule([
+					"passthrough" => ["OPTIONS"]
+		])
+		*/
+	],		
+		
+    "callback" => function ($request, $response, $arguments) use ($container) {
+        $container["jwtToken"] = $arguments["decoded"];
+    },
+    
+    "error" => function ($request, $response, $arguments) {
+    	$data["status"] = false;
+    	$data["message"] = $arguments["message"];
+    	return $response->withJson($data,200);
+    }    
+    
+]));
 
 
 $app->add(function (ServerRequestInterface $request, ResponseInterface $response, callable $next) {
@@ -119,11 +143,11 @@ $app->add(function (ServerRequestInterface $request, ResponseInterface $response
 // 	die;
 	//Logging Here
     //Sampler logs
-    /*
+    
     $this->logger->addInfo("This is an INFO Log");
     $this->logger->addError("This is an ERROR Log");
     $this->logger->addWarning("This is a WARNING log!!!");
-    */
+    
 	//var_dump($request->getQueryParams());die;	
 	
 	return $next($request, $response);

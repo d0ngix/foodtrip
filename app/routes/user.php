@@ -34,23 +34,20 @@ $app->get('/user/{uuid}', function ( $request, $response, $args) {
 /* *
  * Adding new user
  * */
-$app->post('/user', function ( $request, $response, $args) {
+$app->post('/user/add', function ( $request, $response, $args) {
 	
 	$data = $request->getParsedBody();
 	
 	//check for data, return false if empty
 	if (empty($data)) {
-		//$response->setStatus(500);
-		$response->withJson(array('status'=>false,"message"=>'Empty Form!'),500);
-		return $response;
+		return $response->withJson(array('status'=>false,"message"=>'Empty Form!'),500);
 	}
 	
 	//search email and number if it exist
 	$isExist = $this->db->select(array('email'))->from('users')->where('email','=',$data['email']);
 	$isExist = $isExist->execute(false);
 	if (!empty($isExist->fetch())) {
-		$response->withJson(array('status'=>false,"message"=>'User already exist!'),500);
-		return $response;		
+		return $response->withJson(array('status'=>false,"message"=>'User already exist!'),500);				
 	}
 
 	//check for email and password if empty
@@ -139,7 +136,6 @@ $app->put('/user[/{uuid}]', function ( $request, $response, $args) {
 		
 });
 
-
 /* *
  * User Login
  * */
@@ -156,10 +152,34 @@ $app->post('/user/login', function ($request, $response, $args) {
 
 		//verify the password
 		if (!password_verify($data['password'], $arrResult['password'])) {
-			return $response->withJson(array('status'=>false, "message"=> 'Invalid Username or Password!'), 404);
+			return $response->withJson(array('status'=>false, "message"=> 'Invalid Username or Password!'), 401);
 		}
+
+		unset($arrResult['password']);
+				
+		//return $response->withJson(array('status'=>true, "data"=>$arrResult),200);
 		
-		return $response->withJson(array('status'=>true, "data"=>$arrResult),200);
+		//generate JWT token
+		$token = $this->UserUtil->tokenized($arrResult);
+		
+		return $response->withJson(array('status'=>true, "data"=>$token),200);		
+		
+	} catch (Exception $e) {
+		
+		return $response->withJson(array('status'=>false, "message"=>$e->getMessage()),200);
+		
+	}
+
+});
+
+/* *
+ * Generte User Token
+ */
+$app->post('/user/token', function ($request, $response, $args) {
+
+	$data = $request->getParsedBody();
+var_dump($data);die;
+	try {
 		
 	} catch (Exception $e) {
 		
