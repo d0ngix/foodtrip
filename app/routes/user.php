@@ -77,11 +77,14 @@ $app->post('/user/add', function ( $request, $response, $args) {
 		$insertId = $insertStatement->execute(true);
 				
 		//return the uuid
-		$strUuid = $this->db->select(array('uuid'))->from('users')->where('id','=',$insertId);
-		$strUuid = $strUuid->execute(false);
+		$arrResult = $this->db->select()->from('users')->where('id','=',$insertId);
+		$arrResult = $arrResult->execute(false);
 		
-		return $response->withJson(array('status'=>true, "data"=>$strUuid->fetch()), 200);		
+		//generate JWT token
+		$token = $this->UserUtil->tokenized($arrResult);
 		
+		return $response->withJson(array('status'=>true, "data"=>$token),200);		
+				
 	} catch (Exception $e) {
 		
 		return $response->withJson(array('status'=>false, "message"=> $e->getMessage() ), 200);
