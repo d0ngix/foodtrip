@@ -78,7 +78,8 @@ $app->post('/user/add', function ( $request, $response, $args) {
 				
 		//return the uuid
 		$arrResult = $this->db->select()->from('users')->where('id','=',$insertId);
-		$arrResult = $arrResult->execute(false);
+		$arrResult = $arrResult->execute()->fetch();
+		unset($arrResult['password']);
 		
 		//generate JWT token
 		$token = $this->UserUtil->tokenized($arrResult);
