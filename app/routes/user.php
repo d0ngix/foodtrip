@@ -40,19 +40,19 @@ $app->post('/user/add', function ( $request, $response, $args) {
 	
 	//check for data, return false if empty
 	if (empty($data)) {
-		return $response->withJson(array('status'=>false,"message"=>'Empty Form!'),500);
+		return $response->withJson(array('status'=>false,"message"=>'Empty Form!'), 204);
 	}
 	
 	//search email and number if it exist
 	$isExist = $this->db->select(array('email'))->from('users')->where('email','=',$data['email']);
 	$isExist = $isExist->execute(false);
 	if (!empty($isExist->fetch())) {
-		return $response->withJson(array('status'=>false,"message"=>'User already exist!'),500);				
+		return $response->withJson(array('status'=>false,"message"=>'User already exist!'), 409);				
 	}
 
 	//check for email and password if empty
 	if (empty($data['password']) || empty($data['email'])) {
-		$response->withJson(array('status'=>false,"message"=>'Email or Password must not be empty!'),500);
+		$response->withJson(array('status'=>false,"message"=>'Email or Password must not be empty!'), 204);
 		return $response;
 	}
 	
