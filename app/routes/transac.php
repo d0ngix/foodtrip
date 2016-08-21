@@ -331,6 +331,29 @@ $app->put('/transac/order/{user_uuid}/{trasac_uuid}', function($request, $respon
 
 });
 
+
+/**
+ * verifying the mobile payment on the server side
+ * method - POST
+ * @param paymentId paypal payment id
+ * @param paymentClientJson paypal json after the payment
+ */
+$app->post('/transac/paypal/verify', function($request, $response, $args){
+	
+	$data = $request->getParsedBody();
+	$paymentId = $data[2]['response']['id'];
+	
+	try {
+		$payment = $this->PaypalPayment->get($paymentId, $this->PaypalApiContext);
+		
+		if($payment->getState() === 'approved') {
+			//update transaction status
+		}		
+	
+	} catch (Exception $e) {
+	}
+});
+
 //Get promo discount
 
 //Get delivery cost

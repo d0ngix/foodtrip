@@ -4,6 +4,7 @@
  * @license MIT
  * @license http://opensource.org/licenses/MIT
  */
+
 namespace Slim\PDO\Statement;
 
 use Slim\PDO\Clause\LimitClause;
@@ -394,6 +395,30 @@ abstract class StatementContainer
      * @return mixed
      */
     abstract public function __toString();
+
+    /**
+     * @return bool
+     */
+    public function commit()
+    {
+        return $this->dbh->commit();
+    }
+
+    /**
+     * @return bool
+     */
+    public function rollBack()
+    {
+        return $this->dbh->rollBack();
+    }
+
+    /**
+     * @return bool
+     */
+    public function beginTransaction()
+    {
+        return $this->dbh->beginTransaction();
+    }
 
     /**
      * @return \PDOStatement

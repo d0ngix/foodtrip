@@ -1,7 +1,6 @@
 <?php
 use Psr\Http\Message\ServerRequestInterface;
 use Psr\Http\Message\ResponseInterface;
-use \Firebase\JWT\JWT;
 
 //use Model\User;
 //use Controller\UserController;
@@ -40,6 +39,20 @@ $container = $app->getContainer();
 /** ******************************************************************* 
  * Dependecy Injection Container (DIC) - START
  **********************************************************************/
+//Adding Database connection to Container
+$container['db'] = function ($c) {
+	// 	$dsn = 'mysql:host=localhost;dbname=foodtrip;charset=utf8';
+	// 	$usr = 'root';
+	// 	$pwd = '';
+	$dsn = 'mysql:host=us-cdbr-iron-east-04.cleardb.net;dbname=heroku_9d2a1cfa6f2cfa2;charset=utf8';
+	$usr = 'b7bed7fbfec968';
+	$pwd = '79de4384';
+	$pdo = new \Slim\PDO\Database($dsn, $usr, $pwd);
+	$pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
+	$pdo->setAttribute(PDO::ATTR_DEFAULT_FETCH_MODE, PDO::FETCH_ASSOC);
+	return $pdo;
+};
+
 //Adding Monolog logger to Container
 $container['logger'] = function ($c) {
 	$logger = new \Monolog\Logger('foodtrip_log');
@@ -49,23 +62,49 @@ $container['logger'] = function ($c) {
 };
 
 //Adding JWT to Container
+use \Firebase\JWT\JWT;
 $container["jwt"] = function ($container) {
 	return new JWT;
 };
 
-//Adding Database connection to Container
-$container['db'] = function ($c) {	
-// 	$dsn = 'mysql:host=localhost;dbname=foodtrip;charset=utf8';
-// 	$usr = 'root';
-// 	$pwd = '';	
-	$dsn = 'mysql:host=us-cdbr-iron-east-04.cleardb.net;dbname=heroku_9d2a1cfa6f2cfa2;charset=utf8';
-	$usr = 'b7bed7fbfec968';
-	$pwd = '79de4384';	
-	$pdo = new \Slim\PDO\Database($dsn, $usr, $pwd);	
-	$pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
-	$pdo->setAttribute(PDO::ATTR_DEFAULT_FETCH_MODE, PDO::FETCH_ASSOC);	
-	return $pdo;
+/* Paypal Setup - START*/
+//Injecting Paypal Payment
+use \PayPal\Api\Payment;
+$container["PaypalPayment"] = function ($container) {
+	return new Payment;
 };
+
+//Injecting Paypal ApiContext
+use PayPal\Rest\ApiContext;
+use PayPal\Auth\OAuthTokenCredential;
+$container["PaypalApiContext"] = function ($container) {
+	//TODO: put it in an environment variables
+	$clientId = 'AcN1vThV_mxNQ2H2PQnQqugHTtup_wmS9nO6CYrO0OT1zkM18RxvLHcgUE39thiq8ugQqdqu7faR20GN';	 
+	$clientSecret = 'EI4mfCDgr8uTr5Nbme0W5mu9mmBXRo_p52SCs9a7WzSDPp44-NI_b_k9lIPU8hMdMOYiidFS8URCLMWO';
+
+	$apiContext = new ApiContext(
+			new OAuthTokenCredential(
+					$clientId,
+					$clientSecret
+			)
+	);
+	
+	$apiContext->setConfig(
+		array(
+				'mode' => 'sandbox',
+				'log.LogEnabled' => true,
+				'log.FileName' => 'logs/PayPal.log',
+				'log.LogLevel' => 'DEBUG', // PLEASE USE `INFO` LEVEL FOR LOGGING IN LIVE ENVIRONMENTS
+				//'cache.enabled' => true,
+				// 'http.CURLOPT_CONNECTTIMEOUT' => 30
+				// 'http.headers.PayPal-Partner-Attribution-Id' => '123123123'
+				//'log.AdapterFactory' => '\PayPal\Log\DefaultLogFactory' // Factory class implementing \PayPal\Log\PayPalLogFactory
+		)
+	);	
+	
+	return $apiContext;
+};
+/* Paypal Setup - END */
 
 //Inject User Utility Class
 use Utilities\UserUtil;
