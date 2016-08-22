@@ -1,9 +1,9 @@
 <?php
 
-/* *
+/**
  * Submit Order
- * */
-$app->post('/transac/{user_uuid}', function ($request, $response, $args) {
+ **/
+$app->post('/transac', function ($request, $response, $args) {
 	
 	$data = $request->getParsedBody();
 	
@@ -19,7 +19,8 @@ $app->post('/transac/{user_uuid}', function ($request, $response, $args) {
 	}  
 
 	//check user if valid
-	$userId = $this->UserUtil->checkUser($args['user_uuid']);
+	$strUserUuid = $this->jwtToken->user->uuid;
+	$userId = $this->UserUtil->checkUser($strUserUuid);
 	if ( ! $userId ) {
 		$response->withJson(array("status" => false, "message" =>"Invalid User!"), 404);
 		return $response;
@@ -115,13 +116,14 @@ $app->post('/transac/{user_uuid}', function ($request, $response, $args) {
 
 });
 
-/* *
+/**
  * Get Single Orders "order"
- * */
-$app->get('/transac/order/{user_uuid}/{trasac_uuid}', function($request, $response, $args){
+ **/
+$app->get('/transac/order/{trasac_uuid}', function($request, $response, $args){
 
 	//check user if valid
-	$userId = $this->UserUtil->checkUser($args['user_uuid']);
+	$strUserUuid = $this->jwtToken->user->uuid;
+	$userId = $this->UserUtil->checkUser($strUserUuid);
 	if ( ! $userId ) {
 		return $response->withJson(array("status" => false, "message" =>"Invalid User!"), 404);
 	}
@@ -161,13 +163,14 @@ $app->get('/transac/order/{user_uuid}/{trasac_uuid}', function($request, $respon
 
 });
 
-/* *
+/**
  * Get All Orders of a user - "orders"
-* */
+ **/
 $app->get('/transac/orders/{user_uuid}[/{status}]', function($request, $response, $args){
 
 	//check user if valid
-	$userId = $this->UserUtil->checkUser($args['user_uuid']);
+	$strUserUuid = $this->jwtToken->user->uuid;
+	$userId = $this->UserUtil->checkUser($strUserUuid);
 	if ( ! $userId ) {
 		return $response->withJson(array("status" => false, "message" =>"Invalid User!"), 404);
 	}
@@ -222,15 +225,16 @@ $app->get('/transac/orders/{user_uuid}[/{status}]', function($request, $response
 
 });
 
-/* *
+/**
  * Update transaction_item status 
- * */
-$app->put('/transac/order/item/{user_uuid}/{trasac_uuid}', function($request, $response, $args){
+ **/
+$app->put('/transac/order/item/{trasac_uuid}', function($request, $response, $args){
 	
 	$data = $request->getParsedBody();
 	
 	//check user if valid
-	$userId = $this->UserUtil->checkUser($args['user_uuid']);
+	$strUserUuid = $this->jwtToken->user->uuid;
+	$userId = $this->UserUtil->checkUser($strUserUuid);
 	if ( ! $userId ) {
 		return $response->withJson(array("status" => false, "message" =>"Invalid User"), 404);
 	}	
@@ -239,15 +243,14 @@ $app->put('/transac/order/item/{user_uuid}/{trasac_uuid}', function($request, $r
 	$arrTransac = $this->TransacUtil->checkTransac($args['trasac_uuid'], $userId);
 	if ( ! $arrTransac ) {
 		return $response->withJson(array("status" => false, "message" =>"No Record(s) Found!"), 404);
-	}
-	
+	}	
 
 	try {
 			
 		$updateStmt = $this->db->update( array('status' => $data['status']) )
 								->table('transaction_items')
 								->whereIn('id',$data['id'],'AND')
-								->where('transaction_id','=',$arrTransac['id']);
+								->where('transaction_id', '=', $arrTransac['id']);
 		$intCount = $updateStmt->execute();
 		
 		//if no rows updated
@@ -258,7 +261,9 @@ $app->put('/transac/order/item/{user_uuid}/{trasac_uuid}', function($request, $r
 		//select the updated items
 		$selectStmt = $this->db->select()->from('transaction_items')->whereIn('id',$data['id'],'AND')->where('transaction_id','=',$arrTransac['id']);
 		$selectStmt = $selectStmt->execute();
-		$arrResult = $selectStmt->fetchAll();		
+		$arrResult = $selectStmt->fetchAll();
+		
+		$arrResult['add_ons'] = json_decode($arrResult['add_ons']);
 		
 		return $response->withJson(array("status" => true, "data" =>$arrResult), 200);
 		
@@ -270,14 +275,21 @@ $app->put('/transac/order/item/{user_uuid}/{trasac_uuid}', function($request, $r
 	
 });
 
-/* *
+/**
  * Update Order Transactions details
  * - address_id
  * - delivery_man_id
- * - status = 0 - cancelled; 1 = waiting-for-payment; 2 = dispatched; 3 = delivered; 4 = completed; 5 = archived;
+ * - status
+ * 		0 - cancelled; 
+ * 		1 = waiting-for-payment; 
+ * 		2 = paid; 
+ * 		3 = dispatched; 
+ * 		4 = delivered; 
+ * 		5 = completed; 
+ * 		6 = archived;
  * - transac_ref
-* */
-$app->put('/transac/order/{user_uuid}/{trasac_uuid}', function($request, $response, $args){
+ **/
+$app->put('/transac/order/{trasac_uuid}', function($request, $response, $args){
 
 	//allowed field to be updated
 	$arrAllowedField = array('delivery_man_id','address_id','status','transac_ref');
@@ -285,7 +297,8 @@ $app->put('/transac/order/{user_uuid}/{trasac_uuid}', function($request, $respon
 	$data = $request->getParsedBody();
 	
 	//check user if valid
-	$userId = $this->UserUtil->checkUser($args['user_uuid']);
+	$strUserUuid = $this->jwtToken->user->uuid;
+	$userId = $this->UserUtil->checkUser($strUserUuid);
 	if ( ! $userId ) {
 		return $response->withJson(array("status" => false, "message" =>"Invalid User"), 404);
 	}
@@ -308,8 +321,7 @@ $app->put('/transac/order/{user_uuid}/{trasac_uuid}', function($request, $respon
 		$updateStmt = $this->db->update( $data )
 								->table('transactions')
 								->where('id','=',$arrTransac['id']);
-		$intCount = $updateStmt->execute();
-				
+		$intCount = $updateStmt->execute();				
 
 		//if no rows updated
 		if ( ! $intCount ) {
@@ -331,26 +343,57 @@ $app->put('/transac/order/{user_uuid}/{trasac_uuid}', function($request, $respon
 
 });
 
-
 /**
  * verifying the mobile payment on the server side
  * method - POST
  * @param paymentId paypal payment id
  * @param paymentClientJson paypal json after the payment
- */
-$app->post('/transac/paypal/verify', function($request, $response, $args){
+ **/
+$app->post('/transac/paypal/verify/{transac_uuid}', function($request, $response, $args){
 	
 	$data = $request->getParsedBody();
-	$paymentId = $data[2]['response']['id'];
+	$paymentId = $data['transac_ref'];
+	
+	//check user if valid
+	$strUserUuid = $this->jwtToken->user->uuid;
+	$userId = $this->UserUtil->checkUser($strUserUuid);
+	if ( ! $userId ) {
+		return $response->withJson(array("status" => false, "message" =>"Invalid User!"), 404);
+	}
+		
+	//check transac if valid	
+	$arrTransac = $this->TransacUtil->checkTransac($args['transac_uuid'], $userId);
+	if ( ! $arrTransac ) {
+		return $response->withJson(array("status" => false, "message" =>"No Record(s) Found!"), 404);
+	}
 	
 	try {
+		
 		$payment = $this->PaypalPayment->get($paymentId, $this->PaypalApiContext);
 		
 		if($payment->getState() === 'approved') {
-			//update transaction status
-		}		
+			//update transaction status			
+			
+			$data['status'] = 2;//status 2 = paid
+			$data['transac_ref'] = $payment->getId();
+			
+			$updateStmt = $this->db->update( $data )
+									->table('transactions')
+									->where('id','=',$arrTransac['id']);
+			$intCount = $updateStmt->execute();
+
+			return $response->withJson(array("status" => true, "data" => $data), 200);
+			
+		}	
+
+		$data['transac_ref'] = $payment->getId();
+		$data['status'] = $payment->getState();
+		return $response->withJson(array("status" => true, "data" => $data), 200);
 	
 	} catch (Exception $e) {
+		
+		return $response->withJson(array("status" => false, "message" =>$e->getMessage()), 500);
+		
 	}
 });
 

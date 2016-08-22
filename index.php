@@ -41,9 +41,9 @@ $container = $app->getContainer();
  **********************************************************************/
 //Adding Database connection to Container
 $container['db'] = function ($c) {
-	// 	$dsn = 'mysql:host=localhost;dbname=foodtrip;charset=utf8';
-	// 	$usr = 'root';
-	// 	$pwd = '';
+// 	$dsn = 'mysql:host=localhost;dbname=foodtrip;charset=utf8';
+// 	$usr = 'root';
+// 	$pwd = '';
 	$dsn = 'mysql:host=us-cdbr-iron-east-04.cleardb.net;dbname=heroku_9d2a1cfa6f2cfa2;charset=utf8';
 	$usr = 'b7bed7fbfec968';
 	$pwd = '79de4384';
