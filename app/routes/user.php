@@ -6,8 +6,8 @@
 $app->get('/user/{uuid}', function ( $request, $response, $args) {
 	
 	try {
-
-		$selectUserStatement = $this->db->select()->from('users')->where('uuid','=',$args['uuid']);
+		$strUserUuid = $this->jwtToken->user->uuid;
+		$selectUserStatement = $this->db->select()->from('users')->where('uuid','=',$strUserUuid);
 		$stmt = $selectUserStatement->execute(false);
 		$data = $stmt->fetch();
 		
