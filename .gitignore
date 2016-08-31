@@ -10,3 +10,7 @@ heroku_key.pub
 *.log
 
 logs/app.log
+
+vendor/.DS_Store
+
+.DS_Store
