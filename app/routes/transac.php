@@ -169,7 +169,7 @@ $app->get('/transac/order/{trasac_uuid}', function($request, $response, $args){
 /**
  * Get All Orders of a user - "orders"
  **/
-$app->get('/transac/orders/{user_uuid}[/{status}]', function($request, $response, $args){
+$app->get('/transac/orders/all[/{status}]', function($request, $response, $args){
 
 	//check user if valid
 	$strUserUuid = $this->jwtToken->user->uuid;
@@ -213,7 +213,12 @@ $app->get('/transac/orders/{user_uuid}[/{status}]', function($request, $response
 		//set the items of each transactions
 		$arrTransacNew = [];
 		foreach ($arrTransac as $v) {
-			$v['items'] = $arrResult[$v['id']];
+			$v['items'] = empty($arrResult[$v['id']]) ? "" : $arrResult[$v['id']]; 
+			
+			//json_decode add-ons
+			if (!empty($v['items']['add_ons'])) 
+				$v['items']['add_ons'] = json_decode($v['items']['add_ons']);
+			
 			$arrTransacNew[] = $v;
 		}
 		$arrTransac = $arrTransacNew;
