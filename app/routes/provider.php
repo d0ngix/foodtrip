@@ -93,6 +93,10 @@ $app->get('/provider', function($request, $response, $args){
 					});				
 					
 				}
+				
+				$v['address']['lat'] = $arrAddress[$v['id']]['latitude'];
+				$v['address']['long'] = $arrAddress[$v['id']]['longitude']; 
+				$v['address']['address_name'] = $arrAddress[$v['id']]['address_name'];
 
 				$arrNewResult[] = $v;
 			}
