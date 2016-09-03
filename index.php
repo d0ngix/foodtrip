@@ -5,6 +5,10 @@ use Psr\Http\Message\ResponseInterface;
 //use Model\User;
 //use Controller\UserController;
 
+/*********Configs - START ***************/
+date_default_timezone_set('Asia/Singapore');
+/*********Configs - END ***************/
+
 /*
 $objUserCtrl = new UserController();
 $objUser = new User();
