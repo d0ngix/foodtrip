@@ -37,12 +37,20 @@ $app->get('/user/{uuid}', function ( $request, $response, $args) {
 $app->post('/user/add', function ( $request, $response, $args) {
 	
 	$data = $request->getParsedBody();
+
+	//Send email ntifiaciton
+	$this->NotificationUtil->emailNewUser($data);
 	
 	//check for data, return false if empty
 	if (empty($data)) {
 		return $response->withJson(array('status'=>false,"message"=>'Empty Form!'), 204);
 	}
 	
+	//check if email is valid
+	if (filter_var($data['email'], FILTER_VALIDATE_EMAIL) === false) {
+		return $response->withJson(array('status'=>false,"message"=>'Invalid Email!'), 412);
+	}
+		
 	//search email and number if it exist
 	$isExist = $this->db->select(array('email'))->from('users')->where('email','=',$data['email']);
 	$isExist = $isExist->execute(false);
@@ -83,6 +91,9 @@ $app->post('/user/add', function ( $request, $response, $args) {
 		
 		//generate JWT token
 		$token = $this->UserUtil->tokenized($arrResult);
+		
+		//Send email ntifiaciton
+		$this->NotificationUtil->emailNewUser();
 		
 		return $response->withJson(array('status'=>true, "data"=>$token),200);		
 				

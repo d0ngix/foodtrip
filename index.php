@@ -138,6 +138,13 @@ $container['TransacUtil'] = function ($c) {
 	return $objUtil;
 };
 
+//Inject NotificationUtil Class
+use Utilities\NotificationUtil;
+$container['NotificationUtil'] = function ($c) {
+	$objUtil = new NotificationUtil($c->db);
+	return $objUtil;
+};
+
 /** *******************************************************************
  * Dependecy Injection Container (DIC) - END
  **********************************************************************/

@@ -10,6 +10,11 @@ class NotificationUtil {
 	
 	}
 	
+	//email notification for new user
+	public function emailNewUser($data) {
+		var_dump('test!@#');die;
+	}
+	
 	//send notification reciept
 	
 	//send status update
