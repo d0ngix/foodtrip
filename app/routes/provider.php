@@ -1,17 +1,56 @@
 <?php
 
-/* *
+/**
  * Get list of Vendors
- * */
-$app->get('/provider/', function($request, $response, $args){
+ **/
+$app->get('/provider', function($request, $response, $args){
 	
 	$arrLocation = $request->getQueryParams();
 	
+	extract($arrLocation);
+// 	var_dump($lat);
+// 	var_dump($long);
+// 	var_dump($rad);
+// 	die;
+	/**
+	 * Get all nearest retaurant from the user flow
+	 * - Get all vendors within 1KM radius using Haversine Formula
+	 * 		ref: https://developers.google.com/maps/articles/phpsqlsearch_v3?csw=1
+	 * - Query to Google Maps the travel time duration from restaurant to user using Google Distance Matrix API 
+	 * 		ref: https://developers.google.com/maps/documentation/distance-matrix/intro
+	 *   
+	 **/
+	
 	try {
-		
-		$selectStmt = $this->db->select()->from('vendors');
+
+		/**
+		 * - Haversine Formula
+		 * SELECT address, name, lat, lng, 
+		 * 		( 3959 * acos( cos( radians('%s') ) * cos( radians( lat ) ) * cos( radians( lng ) - radians('%s') ) + sin( radians('%s') ) * sin( radians( lat ) ) ) ) AS distance 
+		 * FROM markers 
+		 * 		HAVING distance < '%s' ORDER BY distance LIMIT 0 , 20	
+		 **/
+		$arrSelect = [
+			'vendor_id', 'address_name', 'latitude', 'longitude', 'operating_hours',
+			"( 3959 * acos( cos( radians($lat) ) * cos( radians( latitude ) ) * cos( radians( longitude ) - radians($long) ) + sin( radians($lat) ) * sin( radians( latitude ) ) ) ) AS distance"
+		];
+		$selectStmt = $this->db->select($arrSelect)->from('vendor_addresses')->having('distance','<', $rad)->orderBy('distance');
 		$selectStmt = $selectStmt->execute();
 		$arrResult = $selectStmt->fetchAll(); 
+		
+		if (empty($arrResult)) 
+			return $response->withJson(array("status" => false, "message" => "Oooppss! We could not find any restaurant near you."), 404);
+
+		$intVendorId = $arrAddress = [];
+		foreach ($arrResult as $k => $v) {
+			$intVendorId[] = $v['vendor_id'];
+			$arrAddress[$v['vendor_id']] = $v;
+		}
+
+		//Get the vendors list
+		$selectStmt = $this->db->select()->from('vendors')->whereIn('id',$intVendorId);		
+		$selectStmt = $selectStmt->execute();
+		$arrResult = $selectStmt->fetchAll();		
 		
 		if (!empty($arrResult)) {
 			//un-json the photo details
@@ -27,14 +66,43 @@ $app->get('/provider/', function($request, $response, $args){
 					unset($v['photo']['md5']);
 				}
 				
-				//TODO: Check if Vendor is Open at the time of request
-				$v['open'] = true;				
+				//flag if vendor is open
+				$v['open'] = false;
 				
+				//TODO: Check if Vendor is Open at the time of request
+				if (!empty($arrAddress[$v['id']]['operating_hours'])) {
+					$vendorAddress =$arrAddress[$v['id']];
+					$arrSched = json_decode($vendorAddress['operating_hours'], true);
+					
+					//compare current day/time if open
+					$strDay = strtolower(date('D'));
+					array_walk($arrSched, function ($i, $k) use (&$strDay, &$v) {
+						if(!empty($i[$strDay])) {
+							$timeNow = time();//current server time
+							$timeStart = date('U', strtotime($i[$strDay]['start']));
+							$timeEnd = date('U', strtotime($i[$strDay]['end']));
+							
+							if ($timeStart <= $timeNow && $timeNow <= $timeEnd) {
+								$v['open'] = true;
+							}
+							
+							$v['operating_hours']['start'] = $i[$strDay]['start'];
+							$v['operating_hours']['end'] = $i[$strDay]['end'];
+ 							//var_dump("$timeStart <= $timeNow <= $timeEnd");
+						} 
+					});				
+					
+				}
+				
+				$v['address']['lat'] = $arrAddress[$v['id']]['latitude'];
+				$v['address']['long'] = $arrAddress[$v['id']]['longitude']; 
+				$v['address']['address_name'] = $arrAddress[$v['id']]['address_name'];
+
 				$arrNewResult[] = $v;
 			}
 			$arrResult = $arrNewResult;
 		}
-		
+
 		return $response->withJson(array("status" => true, "data" => $arrResult), 200);
 		
 	} catch (Exception $e) {

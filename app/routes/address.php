@@ -3,10 +3,10 @@
 /* *
  * Get User Addresses
  * */
-$app->get('/address/{uuid}', function ( $request, $response, $args) {
+$app->get('/address/{user_uuid}', function ( $request, $response, $args) {
 
 	//check user if valid
-	$userId = $this->UserUtil->checkUser($args['uuid']);
+	$userId = $this->UserUtil->checkUser($args['user_uuid']);
 	if ( ! $userId ) {
 		return $response->withJson(array("status" => false, "message" => "Invalid User"), 404);
 	}
@@ -76,7 +76,7 @@ $app->post('/address/{user_uuid}', function ( $request, $response, $args) {
 /* *
  * Update Address
  * */
-$app->put('/address/{id}', function ( $request, $response, $args) {
+$app->put('/address/{user_uuid}/{id}', function ( $request, $response, $args) {
 
 	$data = $request->getParsedBody();
 	
@@ -87,9 +87,7 @@ $app->put('/address/{id}', function ( $request, $response, $args) {
 	}
 
 	//check user if valid
-	$strUserUuid = $this->jwtToken->user->uuid;
-	$userId = $this->UserUtil->checkUser($strUserUuid);	
-
+	$userId = $this->UserUtil->checkUser($args['user_uuid']);
 	if ( ! $userId ) {
 		return $response->withJson(array("status" => false, "message" => "Invalid User"), 404);
 	}
@@ -127,12 +125,10 @@ $app->put('/address/{id}', function ( $request, $response, $args) {
 /* *
  * Delete Adddress
  * */
-$app->delete('/address/{id}', function ( $request, $response, $args) {
+$app->delete('/address/{user_uuid}/{id}', function ( $request, $response, $args) {
 
 	//check user if valid
-	$strUserUuid = $this->jwtToken->user->uuid;	
-	$userId = $this->UserUtil->checkUser($strUserUuid);
-	
+	$userId = $this->UserUtil->checkUser($args['user_uuid']);
 	if ( ! $userId ) {
 		return $response->withJson(array("status" => false, "message" => "Invalid User"),500);
 	}

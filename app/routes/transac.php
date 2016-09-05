@@ -35,14 +35,14 @@ $app->post('/transac', function ($request, $response, $args) {
 	}
 	
 	//get the sub_total (add all amount in items as well as the add_ons total)
-	$fltItemTotal = 0;
+	$fltItemTotal = $fltAddOnTotal = 0;
 	foreach ( $data['items'] as $value ) {
 		$fltTotal = $value['qty'] * $value['price'];
 		if (!empty($value['discount']))
 			$fltTotal = $fltTotal - $value['discount'];
 
 		//Calculate the add_ons total
-		if(!empty($value['add_ons'])) {
+		if(!empty($value['add_ons']) && count($value['add_ons']) > 0) {
 			$fltAddOnTotal = 0;
 			foreach ( $value['add_ons'] as $v ) {
 				$fltAddOnTotal += ($v['price'] * $v['qty']);
@@ -57,6 +57,7 @@ $app->post('/transac', function ($request, $response, $args) {
 		
 		$fltItemTotal += $value['total_amount'];
 	}	
+	
 	$data['items'] = $arrNewDataItem;
 	$data['transac']['sub_total'] = $fltItemTotal;
 	
@@ -93,6 +94,8 @@ $app->post('/transac', function ($request, $response, $args) {
 		
 		//insert into transaction_items
 		foreach ( $data['items'] as $value ) {
+			
+			if (empty($value['add_ons']))  unset($value['add_ons']);
 			
 			$value['transaction_id'] = $intTransacId; 
 					
@@ -166,7 +169,7 @@ $app->get('/transac/order/{trasac_uuid}', function($request, $response, $args){
 /**
  * Get All Orders of a user - "orders"
  **/
-$app->get('/transac/orders/{user_uuid}[/{status}]', function($request, $response, $args){
+$app->get('/transac/orders/all[/{status}]', function($request, $response, $args){
 
 	//check user if valid
 	$strUserUuid = $this->jwtToken->user->uuid;
@@ -210,7 +213,12 @@ $app->get('/transac/orders/{user_uuid}[/{status}]', function($request, $response
 		//set the items of each transactions
 		$arrTransacNew = [];
 		foreach ($arrTransac as $v) {
-			$v['items'] = $arrResult[$v['id']];
+			$v['items'] = empty($arrResult[$v['id']]) ? "" : $arrResult[$v['id']]; 
+			
+			//json_decode add-ons
+			if (!empty($v['items']['add_ons'])) 
+				$v['items']['add_ons'] = json_decode($v['items']['add_ons']);
+			
 			$arrTransacNew[] = $v;
 		}
 		$arrTransac = $arrTransacNew;

@@ -49,3 +49,11 @@ array_walk($data['items'], function ($v, $k) use (&$arrMenuId) {
 //return query params
 $selectStmt->debugDumpParams();
 //---------------------------
+/**
+ * - Haversine Formula - calculate distance base on lat/long - https://developers.google.com/maps/articles/phpsqlsearch_v3?csw=1 
+ * SELECT address, name, lat, lng,
+ * 		( 3959 * acos( cos( radians('%s') ) * cos( radians( lat ) ) * cos( radians( lng ) - radians('%s') ) + sin( radians('%s') ) * sin( radians( lat ) ) ) ) AS distance
+ * FROM markers
+ * 		HAVING distance < '%s' ORDER BY distance LIMIT 0 , 20
+ **/
+//---------------------------
