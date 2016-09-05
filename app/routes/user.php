@@ -100,9 +100,6 @@ $app->post('/user/add', function ( $request, $response, $args) {
 		//generate JWT token
 		$token = $this->UserUtil->tokenized($arrResult);
 		
-		//Send email ntifiaciton
-		$this->NotificationUtil->emailNewUser();
-		
 		return $response->withJson(array('status'=>true, "data"=>$token),200);		
 				
 	} catch (Exception $e) {
