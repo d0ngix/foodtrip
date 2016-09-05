@@ -4,9 +4,17 @@
  * Get User Details
  * */
 $app->get('/user/{uuid}', function ( $request, $response, $args) {
+	//check if the requestor is sys-admin
+	$isAdmin = false;
 	
 	try {
+		//TODO: Only the owner, system admin and vendor can call Get User Details
+		
 		$strUserUuid = $this->jwtToken->user->uuid;
+		
+		if ($args['uuid'] !== $strUserUuid && $isAdmin == false) 
+			return $response->withJson(array('status'=>false, 'message'=>'Unauthorized Access!'), 401);
+		
 		$selectUserStatement = $this->db->select()->from('users')->where('uuid','=',$strUserUuid);
 		$stmt = $selectUserStatement->execute(false);
 		$data = $stmt->fetch();
@@ -39,7 +47,7 @@ $app->post('/user/add', function ( $request, $response, $args) {
 	$data = $request->getParsedBody();
 
 	//Send email ntifiaciton
-	//$this->NotificationUtil->emailNewUser($data);
+	$this->NotificationUtil->emailNewUser($data);
 	
 	//check for data, return false if empty
 	if (empty($data)) {

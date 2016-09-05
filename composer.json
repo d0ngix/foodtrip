@@ -39,7 +39,7 @@
         "slim/http-cache": "^0.3.0",
         "tuupola/slim-jwt-auth": "^2.3",
         "paypal/rest-api-sdk-php": "*",
-		"swiftmailer/swiftmailer": "@stable"        
+		"phpmailer/phpmailer": "~5.2"        
     },
     "require-dev": {
         "squizlabs/php_codesniffer": "^2.5",
