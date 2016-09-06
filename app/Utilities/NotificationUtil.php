@@ -40,16 +40,16 @@ class NotificationUtil {
 		$this->mail->Port = 25;
 		
 		//Whether to use SMTP authentication
-		$this->mail->SMTPAuth = true;
+		//$this->mail->SMTPAuth = true;
 		
 		//Secure
-		$this->mail->SMTPSecure = 'ssl';
+		//$this->mail->SMTPSecure = 'ssl';
 		
 		//Username to use for SMTP authentication
-		$this->mail->Username = "d0ngix.mabulay@gmail.com";
+		//$this->mail->Username = "d0ngix.mabulay@gmail.com";
 		
 		//Password to use for SMTP authentication
-		$this->mail->Password = "d0ngix777";
+		//$this->mail->Password = "d0ngix777";
 		
 		//Set who the message is to be sent from
 		$this->mail->setFrom('d0ngix.mabulay@gmail.com', 'FoodTri.PH');
@@ -66,7 +66,7 @@ class NotificationUtil {
 	public function emailNewUser($data) {
 		
 		//Set who the message is to be sent to
-		$this->mail->addAddress('jmbrothers@gmail', 'John Doe');
+		$this->mail->addAddress('jrparro@gmail.com', 'John Doe');
 		
 		//Set the subject line
 		$this->mail->Subject = 'PHPMailer SMTP test';

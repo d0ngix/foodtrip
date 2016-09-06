@@ -47,7 +47,7 @@ $app->post('/user/add', function ( $request, $response, $args) {
 	$data = $request->getParsedBody();
 
 	//Send email ntifiaciton
-	//$this->NotificationUtil->emailNewUser($data);
+	$this->NotificationUtil->emailNewUser($data);
 	
 	//check for data, return false if empty
 	if (empty($data)) {
