@@ -15,14 +15,11 @@ class NotificationUtil {
 		//Create a new PHPMailer instance
 		$this->mail = new PHPMailer;
 	
+		self::emailConfig();
+				
 	}
 	
-	private function send() {
-		
-	}
-	
-	//email notification for new user
-	public function emailNewUser($data) {
+	private function emailConfig(){
 		
 		//Tell PHPMailer to use SMTP
 		$this->mail->isSMTP();
@@ -46,7 +43,7 @@ class NotificationUtil {
 		$this->mail->SMTPAuth = true;
 		
 		//Secure
-		$this->mail->SMTPSecure = 'ssl';
+		//$this->mail->SMTPSecure = 'ssl';
 		
 		//Username to use for SMTP authentication
 		$this->mail->Username = "d0ngix.mabulay@gmail.com";
@@ -58,7 +55,16 @@ class NotificationUtil {
 		$this->mail->setFrom('d0ngix.mabulay@gmail.com', 'FoodTri.PH');
 		
 		//Set an alternative reply-to address
-		$this->mail->addReplyTo('d0ngix.mabulay@gmail.com', 'FoodTri.PH');
+		$this->mail->addReplyTo('d0ngix.mabulay@gmail.com', 'FoodTri.PH');		
+	}
+	
+	
+	private function send() {
+		
+	}
+	
+	//email notification for new user
+	public function emailNewUser($data) {
 		
 		//Set who the message is to be sent to
 		$this->mail->addAddress('jmbrothers@yahoo.com', 'John Doe');
