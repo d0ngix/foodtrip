@@ -9,7 +9,7 @@ class NotificationUtil {
 	public $mail = null;
 	
 	public function __construct( $db = null ) {
-	
+
 		$this->db = $db;
 
 		//Create a new PHPMailer instance
@@ -34,16 +34,16 @@ class NotificationUtil {
 		$this->mail->Debugoutput = 'html';
 		
 		//Set the hostname of the mail server
-		$this->mail->Host = "smtp.gmail.com	";
+		$this->mail->Host = "aspmx.l.google.com";
 		
 		//Set the SMTP port number - likely to be 25, 465 or 587
-		$this->mail->Port = 465;
+		$this->mail->Port = 25;
 		
 		//Whether to use SMTP authentication
 		$this->mail->SMTPAuth = true;
 		
 		//Secure
-		//$this->mail->SMTPSecure = 'ssl';
+		$this->mail->SMTPSecure = 'ssl';
 		
 		//Username to use for SMTP authentication
 		$this->mail->Username = "d0ngix.mabulay@gmail.com";
@@ -58,7 +58,6 @@ class NotificationUtil {
 		$this->mail->addReplyTo('d0ngix.mabulay@gmail.com', 'FoodTri.PH');		
 	}
 	
-	
 	private function send() {
 		
 	}
@@ -67,19 +66,18 @@ class NotificationUtil {
 	public function emailNewUser($data) {
 		
 		//Set who the message is to be sent to
-		$this->mail->addAddress('jmbrothers@yahoo.com', 'John Doe');
+		$this->mail->addAddress('jmbrothers@gmail', 'John Doe');
 		
 		//Set the subject line
 		$this->mail->Subject = 'PHPMailer SMTP test';
 		
 		//Read an HTML message body from an external file, convert referenced images to embedded,
-		//convert HTML into a basic plain-text alternative body
-		//$this->mail->msgHTML(file_get_contents('contents.html'), dirname(__FILE__));
-		
-		$this->mail->Body    = 'This is the HTML message body <b>in bold!</b>';
+		//convert HTML into a basic plain-text alternative body		
+		$this->mail->msgHTML(file_get_contents(ROOT_DIR . "/public/email/emailNewUser.html"));
+		//$this->mail->Body    = 'This is the HTML message body <b>in bold!</b>';
 		
 		//Replace the plain text body with one created manually
-		$this->mail->AltBody = 'This is a plain-text message body';
+		//$this->mail->AltBody = 'This is a plain-text message body';
 
 		//Attach an image file
 		//$this->mail->addAttachment('images/phpmailer_mini.png');
