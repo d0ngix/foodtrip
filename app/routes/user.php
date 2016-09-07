@@ -1,8 +1,8 @@
 <?php
 
-/* *
+/**
  * Get User Details
- * */
+ */
 $app->get('/user/{uuid}', function ( $request, $response, $args) {
 	//check if the requestor is sys-admin
 	$isAdmin = false;
@@ -39,15 +39,15 @@ $app->get('/user/{uuid}', function ( $request, $response, $args) {
 
 });
 
-/* *
+/**
  * Adding new user
- * */
+ */
 $app->post('/user/add', function ( $request, $response, $args) {
 	
 	$data = $request->getParsedBody();
 
 	//Send email ntifiaciton
-	//$this->NotificationUtil->emailNewUser($data);
+	$this->NotificationUtil->emailNewUser($data);
 	
 	//check for data, return false if empty
 	if (empty($data)) {
@@ -120,16 +120,13 @@ $app->put('/user[/{uuid}]', function ( $request, $response, $args) {
 				
 	//check for data, return false if empty
 	if (empty($data)) {
-		//$response->setStatus(500);
-		$response->withJson(array('status'=>false,"message"=>'Empty Form!'),500);
-		return false;
+		return $response->withJson(array('status'=>false,"message"=>'Empty Form!'), 500);
 	}
 
 	//check user if valid
 	$userId = $this->UserUtil->checkUser($args['uuid']);
 	if ( ! $userId ) {
-		$response->withJson(array('status'=>false,"message"=>"Invalid User!") ,500);
-		return $response;
+		return $response->withJson(array('status'=>false,"message"=>"Invalid User!") ,500);
 	}
 	
 	//password hashing
@@ -156,9 +153,9 @@ $app->put('/user[/{uuid}]', function ( $request, $response, $args) {
 		
 });
 
-/* *
+/**
  * User Login
- * */
+ */
 $app->post('/user/login', function ($request, $response, $args) {
 
 	$data = $request->getParsedBody();
@@ -186,25 +183,66 @@ $app->post('/user/login', function ($request, $response, $args) {
 		
 	} catch (Exception $e) {
 		
-		return $response->withJson(array('status'=>false, "message"=>$e->getMessage()),200);
+		return $response->withJson(array('status'=>false, "message"=>$e->getMessage()), 500);
 		
 	}
 
 });
 
-/* *
- * Generte User Token
+/**
+ * Verify email
  */
-$app->post('/user/token', function ($request, $response, $args) {
+$app->get('/user/verify/email', function ($request, $response, $args){
+	
+	$data = $request->getQueryParams();
 
-	$data = $request->getParsedBody();
-var_dump($data);die;
+	$data['email'] = base64_decode($data['email']);
+	//$data['verified'] = 0;
+
 	try {
 		
+		//Get the user details based on email and the hash
+		$selectStmt = $this->db->select()->from('users')->whereMany($data,'=');
+		$selectStmt = $selectStmt->execute();
+		$arrResult = $selectStmt->fetch();
+		
+		if (empty($arrResult)) 
+			return $response->withJson(array('status'=>false, "message"=> "User Could Not Be Found!"), 404);
+		elseif ($arrResult['verified'])
+			return $response->withJson(array('status'=>false, "message"=> "We already know your not a spammer."), 200);
+		
+		$arrVerificationDetails = [
+			'date_time' => date('c'),
+			'user_agent' => $_SERVER['HTTP_USER_AGENT'],
+			'ip_address' => $_SERVER['REMOTE_ADDR'],
+			'query_string' => $_SERVER['QUERY_STRING']
+		];
+		
+		$updateStmt = $this->db->update( array('verified' => 1, 'verification_details' => json_encode($arrVerificationDetails) ) )
+								->table('users')
+								->where('id', '=', $arrResult['id']);
+		$blnResult = $updateStmt->execute(true);
+			
+		if (empty($blnResult)) 
+			return $response->withJson(array('status'=>false, "message"=> "Verification Error!"), 404);
+			
+		//Redirecto to Verification Successful
+		echo "Hooraayyyy! You are not a spammer!";
+		die;
+		 
 	} catch (Exception $e) {
 		
-		return $response->withJson(array('status'=>false, "message"=>$e->getMessage()),200);
-		
+		return $response->withJson(array('status'=>false, "message"=>$e->getMessage()), 500);
+	
 	}
+	
 
+});
+
+
+/**
+ * Verify sms
+ */
+$app->get('/user/verify/sms', function ($request, $response, $args){
+	var_dump(md5(rand(0, 10)));die;
 });
