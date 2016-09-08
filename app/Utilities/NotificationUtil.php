@@ -76,6 +76,8 @@ class NotificationUtil {
 		$this->mail->msgHTML(file_get_contents(ROOT_DIR . "/public/email/emailNewUser.html"));
 		//$this->mail->Body    = 'This is the HTML message body <b>in bold!</b>';
 		
+		var_dump($this->mail->Body);die;
+		
 		//Replace the plain text body with one created manually
 		//$this->mail->AltBody = 'This is a plain-text message body';
 

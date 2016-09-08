@@ -227,7 +227,7 @@ $app->get('/user/verify/email', function ($request, $response, $args){
 			return $response->withJson(array('status'=>false, "message"=> "Verification Error!"), 404);
 			
 		//Redirecto to Verification Successful
-		echo "Hooraayyyy! You are not a spammer!";
+		echo "Hooraayyyy! You are real!";
 		die;
 		 
 	} catch (Exception $e) {
