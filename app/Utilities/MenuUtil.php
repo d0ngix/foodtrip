@@ -4,10 +4,12 @@ class MenuUtil
 {
 	public $db = null;
 
-	public function __construct( $db = null ) {
+	public function __construct( $db = null, $jwt, $manifest ) {
 
 		$this->db = $db;
-			
+		$this->jwt = $jwt; 
+		$this->manifest = $manifest;
+
 	}
 
 	//check if uuid for valid user

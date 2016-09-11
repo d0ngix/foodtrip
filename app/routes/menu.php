@@ -66,7 +66,7 @@ $app->get('/menu/all/{vendor_uuid}', function ($request, $response, $args) {
 
 	try {
 
-		$selectStatement = $this->db->select()->from('menus')->whereMany(array('vendor_id' => $vendorId, 'is_active' => 1, 'deleted' => 0), '=');
+		$selectStatement = $this->db->select()->from('menus')->whereMany(array('vendor_id' => $vendorId, 'active' => 1, 'deleted' => 0), '=');
 		$stmt = $selectStatement->execute(false);
 		$data = $stmt->fetchAll();
 

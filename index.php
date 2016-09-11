@@ -7,6 +7,7 @@ use Psr\Http\Message\ResponseInterface;
 
 /*********Configs - START ***************/
 date_default_timezone_set('Asia/Singapore');
+setlocale(LC_MONETARY, 'en_PH');
 define('ROOT_DIR', dirname(__FILE__));
 /*********Configs - END ***************/
 
@@ -111,38 +112,44 @@ $container["PaypalApiContext"] = function ($container) {
 };
 /* Paypal Setup - END */
 
+//Inject manifest.xml config
+$container['manifest'] = function ($c) {
+	$xml = simplexml_load_file("app/manifest.xml") or die("Error: Cannot create object");
+	return $xml;
+};
+
 //Inject User Utility Class
 use Utilities\UserUtil;
 $container['UserUtil'] = function ($c) {
-	$utilities = new UserUtil($c->db, $c->jwt);
+	$utilities = new UserUtil($c->db, $c->jwtToken, $c->manifest);
 	return $utilities;
 };
 
 //Inject User Upload Class
 use Utilities\UploadUtil;
 $container['UploadUtil'] = function ($c) {
-	$objUtil = new UploadUtil($c->db);
+	$objUtil = new UploadUtil($c->db, $c->jwtToken, $c->manifest);
 	return $objUtil;
 };
 
 //Inject MenuUtil Class
 use Utilities\MenuUtil;
 $container['MenuUtil'] = function ($c) {
-	$objUtil = new MenuUtil($c->db);
+	$objUtil = new MenuUtil($c->db, $c->jwtToken, $c->manifest);
 	return $objUtil;
 };
 
 //Inject TransacUtil Class
 use Utilities\TransacUtil;
 $container['TransacUtil'] = function ($c) {
-	$objUtil = new TransacUtil($c->db);
+	$objUtil = new TransacUtil($c->db, $c->jwtToken, $c->manifest);
 	return $objUtil;
 };
 
 //Inject NotificationUtil Class
 use Utilities\NotificationUtil;
 $container['NotificationUtil'] = function ($c) {
-	$objUtil = new NotificationUtil($c->db);
+	$objUtil = new NotificationUtil($c->db, $c->jwtToken, $c->manifest);
 	return $objUtil;
 };
 
@@ -163,7 +170,7 @@ $app->add(new \Slim\Middleware\JwtAuthentication([
 	"rules" => [
 		new \Slim\Middleware\JwtAuthentication\RequestPathRule([
 			"path" => "/",
-			"passthrough" => ["/user/login","/user/add"],
+			"passthrough" => ["/user/login","/user/add","/user/verify/"],
 		]),
 		/*
 		new \Slim\Middleware\JwtAuthentication\RequestMethodRule([

@@ -6,12 +6,9 @@
 $app->get('/provider', function($request, $response, $args){
 	
 	$arrLocation = $request->getQueryParams();
-	
+
 	extract($arrLocation);
-// 	var_dump($lat);
-// 	var_dump($long);
-// 	var_dump($rad);
-// 	die;
+
 	/**
 	 * Get all nearest retaurant from the user flow
 	 * - Get all vendors within 1KM radius using Haversine Formula

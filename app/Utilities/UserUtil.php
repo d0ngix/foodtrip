@@ -4,10 +4,11 @@ class UserUtil
 {
 	public $db = null;
 	
-	public function __construct( $db = null, $jwt ) {
+	public function __construct( $db = null, $jwt, $manifest ) {
 		
 		$this->db = $db;
 		$this->jwt = $jwt;
+		$this->manifest = $manifest;
 			
 	}	
 

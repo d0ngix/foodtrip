@@ -46,9 +46,6 @@ $app->post('/user/add', function ( $request, $response, $args) {
 	
 	$data = $request->getParsedBody();
 
-	//Send email ntifiaciton
-	//$this->NotificationUtil->emailNewUser($data);
-	
 	//check for data, return false if empty
 	if (empty($data)) {
 		return $response->withJson(array('status'=>false,"message"=>'Empty Form!'), 204);
@@ -96,6 +93,9 @@ $app->post('/user/add', function ( $request, $response, $args) {
 		$arrResult = $this->db->select()->from('users')->where('id','=',$insertId);
 		$arrResult = $arrResult->execute()->fetch();
 		unset($arrResult['password']);
+		
+		//Send email ntifiaciton
+		$this->NotificationUtil->emailNewUser($arrResult);
 		
 		//generate JWT token
 		$token = $this->UserUtil->tokenized($arrResult);
@@ -238,7 +238,6 @@ $app->get('/user/verify/email', function ($request, $response, $args){
 	
 
 });
-
 
 /**
  * Verify sms

@@ -6,7 +6,7 @@
 $app->post('/transac', function ($request, $response, $args) {
 	
 	$data = $request->getParsedBody();
-	
+		
 	//check for data, return false if empty
 	if ( empty($data) ) {
 		return $response->withJson(array("status" => false, "message" => 'Empty Form!'), 404);
@@ -101,13 +101,16 @@ $app->post('/transac', function ($request, $response, $args) {
 					
 			$arrFields = array_keys($value);
 			$arrValues = array_values($value);
-			
+						
 			//insert into items table
 			$insertStatement = $this->db->insert( $arrFields )
 										->into('transaction_items')
 										->values($arrValues);
 			$insertId = $insertStatement->execute(true);			
 		}
+		
+		//send email
+		$this->NotificationUtil->emailNewOrder($data);
 		
 		return $response->withJson(array("status" => true, "data" =>$strUuid), 200);
 				

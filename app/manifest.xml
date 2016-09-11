@@ -1,0 +1,60 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<config>
+	<company>
+		<name>FoodTri.PH</name>
+		<code>foodtriph</code>
+	</company>
+	<errors>
+		<err_404>Record Could Not Be Found!</err_404>
+	</errors>
+	<smtp>
+		<!-- Set character encoding -->
+		<CharSet>UTF-8</CharSet>		
+		
+		<!-- Tell PHPMailer to use SMTP -->
+		$this->mail->isSMTP();
+		
+		<!-- 
+		Enable SMTP debugging
+		  0 = off (for production use)
+		  1 = client messages
+		  2 = client and server messages
+		 -->
+		<SMTPDebug>0</SMTPDebug>
+		
+		<!-- Ask for HTML-friendly debug output -->
+		<Debugoutput>html</Debugoutput>
+		
+		<!-- Set the hostname of the mail server -->
+		<Host>smtp.gmail.com</Host>;
+		
+		<!-- Set the SMTP port number - likely to be 25, 465 or 587 -->
+		<Port>587</Port>
+		
+		<!-- Whether to use SMTP authentication -->
+		<SMTPAuth>true</SMTPAuth>
+		
+		<!-- Secure ssl or tls -->
+		<SMTPSecure>tls</SMTPSecure>
+		
+		<account>
+			<!-- Username to use for SMTP authentication -->
+			<Username>d0ngix.mabulay@gmail.com</Username>
+			
+			<!-- Password to use for SMTP authentication -->
+			<Password>d0ngix777</Password>			
+		</account>
+		
+		<!-- Set who the message is to be sent from -->
+		<setFrom>
+			<email>d0ngix.mabulay@gmail.com</email>
+			<name>FoodTri.PH</name>
+		</setFrom>
+		
+		<!-- Set an alternative reply-to address -->
+		<addReplyTo>
+			<email>d0ngix.mabulay@gmail.com</email>
+			<name>FoodTri.PH</name>		
+		</addReplyTo>				
+	</smtp>
+</config>
