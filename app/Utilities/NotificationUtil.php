@@ -74,7 +74,7 @@ class NotificationUtil {
 	}
 	
 	//email notification for new user
-	public function emailNewUser($data) {
+	public function emailUserNew($data) {
 
 		//Set who the message is to be sent to
 		$this->mail->addAddress($data['email'], "$data[first_name] @$data[last_name]");
@@ -84,7 +84,7 @@ class NotificationUtil {
 		
 		//Read an HTML message body from an external file, convert referenced images to embedded,
 		//convert HTML into a basic plain-text alternative body		
-		$this->mail->msgHTML(file_get_contents(ROOT_DIR . "/public/email/emailNewUser.html"));
+		$this->mail->msgHTML(file_get_contents(ROOT_DIR . "/public/email/emailUserNew.html"));
 		//$this->mail->Body    = 'This is the HTML message body <b>in bold!</b>';
 
 		//Replace the firsname place holder
@@ -111,20 +111,27 @@ class NotificationUtil {
 	}
 	
 	//send notification new order reciept
-	public function emailNewOrder ($data) {
+	public function emailOrderStatus ($data) {
 
+		//status config
+		$arrStatusOrder = (array)$this->manifest->status_order;
+		
 		//format the order items in TR
 		$intSN = 0;
 		$strItems = '';
+		
 		foreach ($data['items'] as $arrItem) {
 			$intSN++;
 						
 			$strAddOns = '';
 			if (!empty($arrItem['add_ons'])) {
-
-				foreach (json_decode($arrItem['add_ons'], true) as $arrAddOns) {
-					$strAddOns .= $arrAddOns['name'] . ' - ' . $arrAddOns['price'] . '  x ' . $arrAddOns['qty'] . '<br>';
-					    
+				
+				$arrItemAddOns = $arrItem['add_ons'];
+				if (!is_array($arrItem['add_ons']))
+					$arrItemAddOns = json_decode($arrItem['add_ons'], true);
+					
+				foreach ($arrItemAddOns as $arrAddOns) {
+					$strAddOns .= $arrAddOns['name'] . ' - ' . $arrAddOns['price'] . '  x ' . $arrAddOns['qty'] . '<br>';			    
 				}
 			}
 			
@@ -152,14 +159,14 @@ EOT;
 		
 		//Read an HTML message body from an external file, convert referenced images to embedded,
 		//convert HTML into a basic plain-text alternative body
-		$this->mail->msgHTML(file_get_contents(ROOT_DIR . "/public/email/emailNewOrder.html"));
+		$this->mail->msgHTML(file_get_contents(ROOT_DIR . "/public/email/emailOrderStatus.html"));
 		//$this->mail->Body    = 'This is the HTML message body <b>in bold!</b>';
 		
 		//Replace the place holders
 		$this->mail->Body = str_replace('[USER_FIRSTNAME]', ucfirst($this->jwt->user->first_name), $this->mail->Body);
 		$this->mail->Body = str_replace('[VENDOR_NAME]', $strVendorName, $this->mail->Body);
 		$this->mail->Body = str_replace('[TRANSAC_REF]', $data['transac']['uuid'], $this->mail->Body);
-		$this->mail->Body = str_replace('[TRANSAC_DATE]', date('d-M-Y h:ia'), $this->mail->Body);
+		$this->mail->Body = str_replace('[TRANSAC_DATE]', date('d-M-Y h:iA', strtotime($data['transac']['created'])), $this->mail->Body);
 		$this->mail->Body = str_replace('[TRANSAC_PAYMENT_METHOD]', $data['transac']['payment_method'], $this->mail->Body);
 		$this->mail->Body = str_replace('[TRANSC_ITEMS]', $strItems, $this->mail->Body);
 		$this->mail->Body = str_replace('[TRANSAC_SUBTOTAL]', money_format('%i', $data['transac']['sub_total']), $this->mail->Body);
@@ -167,11 +174,23 @@ EOT;
 		$this->mail->Body = str_replace('[TRANSAC_DELIVERY_COST]', money_format('%i', $data['transac']['delivery_cost']), $this->mail->Body);
 		$this->mail->Body = str_replace('[TRANSAC_TOTAL_AMOUNT]', money_format('%i', $data['transac']['total_amount']), $this->mail->Body);
 		
+		
 		//Set who the message is to be sent to
 		$this->mail->addAddress($this->jwt->user->email, $this->jwt->user->first_name);
 		
-		//Set the subject line
-		$this->mail->Subject = '['.$strVendorName.'] Order confirmation';
+		//setup proper email subject 
+		$strSubject = "Order Status Update";
+		if(empty($data['transac']['status']) ) {
+			$strSubject = "Order Confirmation";
+			$data['transac']['status'] = 1;
+		}
+		$this->mail->Subject = '['.$strVendorName.'] '.$strSubject.' - Ref: '.$data['transac']['uuid'];		
+		
+		//set proper order status
+		$strStatus = $arrStatusOrder["status_".$data['transac']['status']];
+		if ($data['transac']['status'] === 3)
+			$strStatus .= " (Payment Ref: ".$data['transac']['payment_ref'].")";
+		$this->mail->Body = str_replace('[TRANSAC_ORDER_STATUS]', $strStatus, $this->mail->Body);
 		
 		//Attach an image file
 		//$this->mail->addAttachment('images/phpmailer_mini.png');
@@ -186,7 +205,6 @@ EOT;
 		
 	}
 	
-	//send status update
 	
 	//send promotions
 	

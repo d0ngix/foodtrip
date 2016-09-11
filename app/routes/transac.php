@@ -77,6 +77,7 @@ $app->post('/transac', function ($request, $response, $args) {
 	
 	//get the total amount
 	$data['transac']['total_amount'] = $data['transac']['sub_total'] + $data['transac']['delivery_cost'] - $data['transac']['discount']; 
+	$data['transac']['created'] = date('Y-m-d H:i:s');
 	
 	try {
 		
@@ -110,7 +111,7 @@ $app->post('/transac', function ($request, $response, $args) {
 		}
 		
 		//send email
-		$this->NotificationUtil->emailNewOrder($data);
+		$this->NotificationUtil->emailOrderStatus($data);
 		
 		return $response->withJson(array("status" => true, "data" =>$strUuid), 200);
 				
@@ -238,6 +239,11 @@ $app->get('/transac/orders/all[/{status}]', function($request, $response, $args)
 
 /**
  * Update transaction_item status 
+ * status:
+ * - 0 = deferred
+ * - 1 = pending
+ * - 2 = preparing
+ * - 3 = completed
  **/
 $app->put('/transac/order/item/{trasac_uuid}', function($request, $response, $args){
 	
@@ -291,19 +297,19 @@ $app->put('/transac/order/item/{trasac_uuid}', function($request, $response, $ar
  * - address_id
  * - delivery_man_id
  * - status
- * 		0 - cancelled; 
- * 		1 = waiting-for-payment; 
- * 		2 = paid; 
- * 		3 = dispatched; 
- * 		4 = delivered; 
- * 		5 = completed; 
- * 		6 = archived;
+ * 		0 - Cancelled
+ * 		1 - Pending
+ * 		2 - Order Accepted - Awaiting Payment
+ * 		3 - Paid
+ * 		4 - Preparing
+ * 		5 - Dispatched - Delivery on the way
+ * 		6 - Delivered - Order Complete
  * - transac_ref
  **/
 $app->put('/transac/order/{trasac_uuid}', function($request, $response, $args){
 
 	//allowed field to be updated
-	$arrAllowedField = array('delivery_man_id','address_id','status','transac_ref');
+	$arrAllowedField = array('delivery_man_id','address_id','status','payment_ref');
 	
 	$data = $request->getParsedBody();
 	
@@ -316,7 +322,7 @@ $app->put('/transac/order/{trasac_uuid}', function($request, $response, $args){
 
 	//check transac if valid
 	$arrTransac = $this->TransacUtil->checkTransac($args['trasac_uuid'], $userId);
-	if ( ! $arrTransac ) {
+	if ( empty($arrTransac) ) {
 		return $response->withJson(array("status" => false, "message" =>"No Record(s) Found!"), 404);
 	}
 
@@ -329,22 +335,45 @@ $app->put('/transac/order/{trasac_uuid}', function($request, $response, $args){
 				return $response->withJson(array("status" => false, "message" => "Update Not Allowed! - " . $k), 404);
 		} 
 
+		$data['modified'] = date('Y-m-d H:i:s');
+		
 		$updateStmt = $this->db->update( $data )
 								->table('transactions')
 								->where('id','=',$arrTransac['id']);
-		$intCount = $updateStmt->execute();				
+		$intCount = $updateStmt->execute();
 
+		
 		//if no rows updated
 		if ( ! $intCount ) {
-			return $response->withJson(array("status" => false, "message" =>"No Record(s) Found!"), 404);
+			return $response->withJson(array("status" => false, "message" =>"No Changes Made!"), 404);
 		}
-
-		//select the updated items
-		$selectStmt = $this->db->select()->from('transactions')->where('id','=',$arrTransac['id']);
+		
+		//get items on this transactions
+		$selectStmt = $this->db->select(array('transaction_items.*','menus.name'))->from('transaction_items')->where('transaction_id','=',$arrTransac['id']);
+		$selectStmt = $selectStmt->join('menus', 'transaction_items.menu_id','=','menus.id');
 		$selectStmt = $selectStmt->execute();
 		$arrResult = $selectStmt->fetchAll();
-
-		return $response->withJson(array("status" => true, "data" =>$arrResult), 200);
+		
+		$arrOrderDetails['transac'] = $arrTransac; 
+		
+		if (!empty($arrResult)) {
+			foreach ($arrResult as $value) {
+				if (!empty($value['add_ons']))
+					$value['add_ons'] = json_decode($value['add_ons'], true);
+		
+				$arrNewResult[] = $value;
+			}
+		
+			$arrOrderDetails['items'] = $arrNewResult;
+		}		
+		
+		if (!empty($data['status']))
+			$arrOrderDetails['transac']['status'] = $data['status'];
+		
+		//send email
+		$this->NotificationUtil->emailOrderStatus($arrOrderDetails);
+		
+		return $response->withJson(array("status" => true, "data" => $arrOrderDetails['transac']), 200);
 
 	} catch (Exception $e) {
 

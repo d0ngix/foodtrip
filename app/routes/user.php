@@ -95,7 +95,7 @@ $app->post('/user/add', function ( $request, $response, $args) {
 		unset($arrResult['password']);
 		
 		//Send email ntifiaciton
-		$this->NotificationUtil->emailNewUser($arrResult);
+		$this->NotificationUtil->emailUserNew($arrResult);
 		
 		//generate JWT token
 		$token = $this->UserUtil->tokenized($arrResult);

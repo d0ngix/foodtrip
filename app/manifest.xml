@@ -57,4 +57,13 @@
 			<name>FoodTri.PH</name>		
 		</addReplyTo>				
 	</smtp>
+	<status_order>
+		<status_0>Cancelled</status_0>
+		<status_1>Pending - Awating for Order Acceptance</status_1>
+		<status_2>Order Accepted - Awaiting Payment</status_2>
+		<status_3>Paid</status_3>
+		<status_4>Preparing</status_4>
+		<status_5>Dispatched - Delivery on the way</status_5>
+		<status_6>Delivered - Order Complete</status_6>
+	</status_order>
 </config>
