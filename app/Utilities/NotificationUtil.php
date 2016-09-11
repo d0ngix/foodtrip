@@ -205,6 +205,101 @@ EOT;
 		
 	}
 	
+	//Send Order Status Update to Vendor
+	//send notification new order reciept
+	public function emailOrderStatusVendor ($data) {
+	
+		//status config
+		$arrStatusOrder = (array)$this->manifest->status_order;
+	
+		//format the order items in TR
+		$intSN = 0;
+		$strItems = '';
+	
+		foreach ($data['items'] as $arrItem) {
+			$intSN++;
+	
+			$strAddOns = '';
+			if (!empty($arrItem['add_ons'])) {
+	
+				$arrItemAddOns = $arrItem['add_ons'];
+				if (!is_array($arrItem['add_ons']))
+					$arrItemAddOns = json_decode($arrItem['add_ons'], true);
+					
+				foreach ($arrItemAddOns as $arrAddOns) {
+					$strAddOns .= $arrAddOns['name'] . ' - ' . $arrAddOns['price'] . '  x ' . $arrAddOns['qty'] . '<br>';
+				}
+			}
+				
+			$arrItem['price'] = money_format('%i', $arrItem['price']);
+			$arrItem['total_amount'] = money_format('%i', $arrItem['total_amount']);
+				
+			$strItems .= <<<EOT
+				<tr>
+					<td align="center">$intSN</td>
+					<td>
+						<p>$arrItem[menu_name]</p>
+						<p>$strAddOns</p>
+					</td>
+					<td align="right">$arrItem[price]</td>
+					<td align="center">$arrItem[qty]</td>
+					<td align="right">$arrItem[total_amount]</td>
+				</tr>
+EOT;
+		}
+	
+		//Retrieve vendor name
+		$selectStmt = $this->db->select(array('name','email'))->from('vendors')->where('id','=',$data['transac']['vendor_id']);
+		$arrResult = $selectStmt->execute()->fetch();
+		$strVendorName = $arrResult['name'];
+		$strVendorEmail = $arrResult['email'];
+
+		//Read an HTML message body from an external file, convert referenced images to embedded,
+		//convert HTML into a basic plain-text alternative body
+		$this->mail->msgHTML(file_get_contents(ROOT_DIR . "/public/email/emailOrderStatusVendor.html"));
+				//$this->mail->Body    = 'This is the HTML message body <b>in bold!</b>';
+
+		//Replace the place holders
+		$this->mail->Body = str_replace('[TRANSAC_REF]', $data['transac']['uuid'], $this->mail->Body);
+		$this->mail->Body = str_replace('[TRANSAC_DATE]', date('d-M-Y h:iA', strtotime($data['transac']['created'])), $this->mail->Body);
+		$this->mail->Body = str_replace('[TRANSAC_PAYMENT_METHOD]', $data['transac']['payment_method'], $this->mail->Body);
+		$this->mail->Body = str_replace('[TRANSC_ITEMS]', $strItems, $this->mail->Body);
+		$this->mail->Body = str_replace('[TRANSAC_SUBTOTAL]', money_format('%i', $data['transac']['sub_total']), $this->mail->Body);
+		$this->mail->Body = str_replace('[TRANSAC_DISCOUNT]', money_format('%i', $data['transac']['discount']), $this->mail->Body);
+		$this->mail->Body = str_replace('[TRANSAC_DELIVERY_COST]', money_format('%i', $data['transac']['delivery_cost']), $this->mail->Body);
+		$this->mail->Body = str_replace('[TRANSAC_TOTAL_AMOUNT]', money_format('%i', $data['transac']['total_amount']), $this->mail->Body);
+
+
+		//Set who the message is to be sent to
+		$this->mail->addAddress($strVendorEmail, $strVendorEmail);
+
+		//setup proper email subject
+		$strSubject = "[Order Status Update]";
+		if(empty($data['transac']['status']) ) {
+			$strSubject = "[New Order]";
+			$data['transac']['status'] = 1;
+		}
+		$this->mail->Subject = $strSubject.' - Ref: '.$data['transac']['uuid'];
+
+		//set proper order status
+		$strStatus = $arrStatusOrder["status_".$data['transac']['status']];
+		if ($data['transac']['status'] === 3)
+			$strStatus .= " (Payment Ref: ".$data['transac']['payment_ref'].")";
+		$this->mail->Body = str_replace('[TRANSAC_ORDER_STATUS]', $strStatus, $this->mail->Body);
+
+		//Attach an image file
+		//$this->mail->addAttachment('images/phpmailer_mini.png');
+
+		//send the message, check for errors
+		if (!$this->mail->send()) {
+			$this->logger->addError("Mailer Error: " . $this->mail->ErrorInfo);
+			return false;
+		}
+
+		return true;
+	
+	}	
+	
 	
 	//send promotions
 	

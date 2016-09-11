@@ -1,0 +1,65 @@
+<!doctype html>
+<html class="no-js" lang="en" dir="ltr">
+    <head>
+        <meta charset="utf-8">
+        <meta http-equiv="x-ua-compatible" content="ie=edge">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <!--    <title>Foundation for Sites</title>-->
+        <link rel="stylesheet" href="../css/foundation.min.css">
+        <link rel="stylesheet" href="../css/app.css">    
+    </head>
+    <body>
+
+      <img src="http://placehold.it/200x100"><br><br>
+      
+        <table width="600" border="1">
+            <thead>
+                <tr>
+                    <td><strong>Order Details</strong></td>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td>
+                        <p>
+                        Order: <strong>[TRANSAC_REF]</strong> ordered on <strong>[TRANSAC_DATE]</strong> <br>
+                        Payment: <strong>[TRANSAC_PAYMENT_METHOD]</strong><br>
+                        Status: <strong>[TRANSAC_ORDER_STATUS]</strong>
+                        </p>
+                    </td>
+                </tr>                    
+            </tbody>
+        </table>
+        <br>
+        <table width="600" border="1">
+            <thead>
+                <tr>
+                    <td align="center" >S/N</td>
+                    <td>Item</td>
+                    <td align="center">Price</td>
+                    <td align="center">Qty</td>
+                    <td align="center">Total</td>
+                </tr>
+            </thead>
+            <tbody>
+                [TRANSC_ITEMS] 
+                <tr>
+                    <td colspan="4" align="right">Sub Total</td>
+                    <td align="right"><strong>[TRANSAC_SUBTOTAL]</strong></td>
+                </tr>
+                <tr>
+                    <td colspan="4" align="right">Discounts</td>
+                    <td align="right"><strong>[TRANSAC_DISCOUNT]</strong></td>
+                </tr>                
+                <tr>
+                    <td colspan="4" align="right">Shipping</td>
+                    <td align="right"><strong>[TRANSAC_DELIVERY_COST]</strong></td>
+                </tr>                    
+                <tr>
+                    <td colspan="4" align="right">Total</td>
+                    <td align="right"><strong>[TRANSAC_TOTAL_AMOUNT]</strong></td>
+                </tr>                                    
+            </tbody>
+        </table>    
+    </body>
+</html>     

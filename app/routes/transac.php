@@ -110,8 +110,11 @@ $app->post('/transac', function ($request, $response, $args) {
 			$insertId = $insertStatement->execute(true);			
 		}
 		
-		//send email
+		//send email to user
 		$this->NotificationUtil->emailOrderStatus($data);
+		
+		//send email to vendor
+		$this->NotificationUtil->emailOrderStatusVendor($data);
 		
 		return $response->withJson(array("status" => true, "data" =>$strUuid), 200);
 				
@@ -313,6 +316,12 @@ $app->put('/transac/order/{trasac_uuid}', function($request, $response, $args){
 	
 	$data = $request->getParsedBody();
 	
+	//check status if valid
+	if (!empty($data['status']) && (int)$data['status'] >= count((array)$this->manifest->status_order) )
+		return $response->withJson(array("status" => false, "message" =>"Invalid Status Number"), 404);
+		
+		
+	
 	//check user if valid
 	$strUserUuid = $this->jwtToken->user->uuid;
 	$userId = $this->UserUtil->checkUser($strUserUuid);
@@ -325,7 +334,6 @@ $app->put('/transac/order/{trasac_uuid}', function($request, $response, $args){
 	if ( empty($arrTransac) ) {
 		return $response->withJson(array("status" => false, "message" =>"No Record(s) Found!"), 404);
 	}
-
 
 	try {
 		
@@ -370,8 +378,11 @@ $app->put('/transac/order/{trasac_uuid}', function($request, $response, $args){
 		if (!empty($data['status']))
 			$arrOrderDetails['transac']['status'] = $data['status'];
 		
-		//send email
+		//send email to user
 		$this->NotificationUtil->emailOrderStatus($arrOrderDetails);
+		
+		//send email to vendor
+		$this->NotificationUtil->emailOrderStatusVendor($arrOrderDetails);		
 		
 		return $response->withJson(array("status" => true, "data" => $arrOrderDetails['transac']), 200);
 
