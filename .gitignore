@@ -14,3 +14,5 @@ logs/app.log
 vendor/.DS_Store
 
 .DS_Store
+
+composer.lock
