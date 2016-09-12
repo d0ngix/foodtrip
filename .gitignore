@@ -1,18 +1,8 @@
 
-*.log
-
 heroku_key
-
 heroku_key.pub
-
 *.log
-
-*.log
-
 logs/app.log
-
 vendor/.DS_Store
-
 .DS_Store
 
-composer.lock
