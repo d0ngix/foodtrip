@@ -8,11 +8,9 @@ class UploadUtil
 
 	public $imgPath = 'public/img/';
 
-	public function __construct( $db = null, $jwt, $manifest ) {
+	public function __construct( $db = null ) {
 
 		$this->db = $db;
-		$this->jwt = $jwt; 
-		$this->manifest = $manifest;
 
 	}
 

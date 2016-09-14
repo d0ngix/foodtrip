@@ -4,11 +4,9 @@ class TransacUtil {
 
 	public $db = null;
 
-	public function __construct( $db = null, $jwt, $manifest ) {
+	public function __construct( $db = null ) {
 
 		$this->db = $db;
-		$this->jwt = $jwt; 
-		$this->manifest = $manifest;
 
 	}
 

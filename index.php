@@ -121,34 +121,35 @@ $container['manifest'] = function ($c) {
 //Inject User Utility Class
 use Utilities\UserUtil;
 $container['UserUtil'] = function ($c) {
-	$utilities = new UserUtil($c->db, $c->jwtToken, $c->manifest);
+	$utilities = new UserUtil( $c->db, $c->jwt );
 	return $utilities;
 };
 
 //Inject User Upload Class
 use Utilities\UploadUtil;
 $container['UploadUtil'] = function ($c) {
-	$objUtil = new UploadUtil($c->db, $c->jwtToken, $c->manifest);
+	$objUtil = new UploadUtil($c->db );
 	return $objUtil;
 };
 
 //Inject MenuUtil Class
 use Utilities\MenuUtil;
 $container['MenuUtil'] = function ($c) {
-	$objUtil = new MenuUtil($c->db, $c->jwtToken, $c->manifest);
+	$objUtil = new MenuUtil($c->db);
 	return $objUtil;
 };
 
 //Inject TransacUtil Class
 use Utilities\TransacUtil;
 $container['TransacUtil'] = function ($c) {
-	$objUtil = new TransacUtil($c->db, $c->jwtToken, $c->manifest);
+	$objUtil = new TransacUtil($c->db);
 	return $objUtil;
 };
 
 //Inject NotificationUtil Class
 use Utilities\NotificationUtil;
 $container['NotificationUtil'] = function ($c) {
+	if (empty($c->jwtToken)) $c->jwtToken = null;
 	$objUtil = new NotificationUtil($c->db, $c->jwtToken, $c->manifest);
 	return $objUtil;
 };

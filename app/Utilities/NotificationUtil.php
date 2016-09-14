@@ -8,10 +8,10 @@ class NotificationUtil {
 	
 	public $mail = null;
 	
-	public function __construct( $db = null, $jwt, $manifest ) {
+	public function __construct( $db = null, $jwtToken, $manifest ) {
 	
 		$this->db = $db;
-		$this->jwt = $jwt;
+		$this->jwtToken = $jwtToken;
 		$this->manifest = $manifest;
 
 		//Create a new PHPMailer instance
@@ -77,7 +77,8 @@ class NotificationUtil {
 	public function emailUserNew($data) {
 
 		//Set who the message is to be sent to
-		$this->mail->addAddress($data['email'], "$data[first_name] @$data[last_name]");
+		//$this->mail->addAddress($data['email'], "$data[first_name] @$data[last_name]");
+		$this->mail->addAddress("jmbrothers@gmail.com", "$data[first_name] @$data[last_name]");
 		
 		//Set the subject line
 		$this->mail->Subject = '['.$this->manifest->company->name.'] Email Verification';
@@ -163,7 +164,7 @@ EOT;
 		//$this->mail->Body    = 'This is the HTML message body <b>in bold!</b>';
 		
 		//Replace the place holders
-		$this->mail->Body = str_replace('[USER_FIRSTNAME]', ucfirst($this->jwt->user->first_name), $this->mail->Body);
+		$this->mail->Body = str_replace('[USER_FIRSTNAME]', ucfirst($this->jwtToken->user->first_name), $this->mail->Body);
 		$this->mail->Body = str_replace('[VENDOR_NAME]', $strVendorName, $this->mail->Body);
 		$this->mail->Body = str_replace('[TRANSAC_REF]', $data['transac']['uuid'], $this->mail->Body);
 		$this->mail->Body = str_replace('[TRANSAC_DATE]', date('d-M-Y h:iA', strtotime($data['transac']['created'])), $this->mail->Body);
@@ -176,7 +177,7 @@ EOT;
 		
 		
 		//Set who the message is to be sent to
-		$this->mail->addAddress($this->jwt->user->email, $this->jwt->user->first_name);
+		$this->mail->addAddress($this->jwtToken->user->email, $this->jwt->user->first_name);
 		
 		//setup proper email subject 
 		$strSubject = "Order Status Update";

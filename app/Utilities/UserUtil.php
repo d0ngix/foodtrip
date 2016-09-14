@@ -4,11 +4,10 @@ class UserUtil
 {
 	public $db = null;
 	
-	public function __construct( $db = null, $jwt, $manifest ) {
+	public function __construct( $db = null , $jwt ) {
 		
 		$this->db = $db;
 		$this->jwt = $jwt;
-		$this->manifest = $manifest;
 			
 	}	
 
@@ -39,7 +38,7 @@ class UserUtil
 	
 	//Generate JWT Token
 	public function tokenized($data = array()) {
-
+		
 		$now = new \DateTime();
 		$future = new \DateTime("now +7 days");
 		$server = $_SERVER;
