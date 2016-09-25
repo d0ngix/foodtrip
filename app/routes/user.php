@@ -122,6 +122,11 @@ $app->put('/user[/{uuid}]', function ( $request, $response, $args) {
 	if (empty($data)) {
 		return $response->withJson(array('status'=>false,"message"=>'Empty Form!'), 500);
 	}
+	
+	$strUserUuid = $this->jwtToken->user->uuid;
+		
+	if ($args['uuid'] !== $strUserUuid && $isAdmin == false) 
+		return $response->withJson(array('status'=>false, 'message'=>'Unauthorized Access!'), 401);	
 
 	//check user if valid
 	$userId = $this->UserUtil->checkUser($args['uuid']);
