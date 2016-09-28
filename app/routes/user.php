@@ -15,19 +15,27 @@ $app->get('/user/{uuid}', function ( $request, $response, $args) {
 		if ($args['uuid'] !== $strUserUuid && $isAdmin == false) 
 			return $response->withJson(array('status'=>false, 'message'=>'Unauthorized Access!'), 401);
 		
+		//get user details
 		$selectUserStatement = $this->db->select()->from('users')->where('uuid','=',$strUserUuid);
 		$stmt = $selectUserStatement->execute(false);
-		$data = $stmt->fetch();
+		$dataUser = $stmt->fetch();
 		
-		if (!$data)
+		//get user addresses
+		$selectStatement = $this->db->select()->from('addresses')->where('user_id','=',$dataUser['id']);
+		$selectStatement = $selectStatement->execute(false);
+		$dataAddress = $selectStatement->fetchAll();		
+		
+		$data = ['user' => $dataUser,'addresses' => $dataAddress];
+		
+		if (!$data['user'])
 			return $response->withJson(array('status'=>false, 'message'=>'User Not Found!'), 200); 
 		
 		//un-json the photo details
-		if (!empty($data['photo']))
-			$data['photo'] = json_decode($data['photo'],true);
+		if (!empty($data['user']['photo']))
+			$data['user']['photo'] = json_decode($data['user']['photo'],true);
 		
 		//remove the password
-		unset($data['password']);
+		unset($data['user']['password']);
 		
 		return $response->withJson(array('status'=>true, 'data'=>$data) , 200);		
 		
