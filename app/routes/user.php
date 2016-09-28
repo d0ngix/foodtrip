@@ -44,42 +44,43 @@ $app->get('/user/{uuid}', function ( $request, $response, $args) {
  */
 $app->post('/user/add', function ( $request, $response, $args) {
 	
-	$data = $request->getParsedBody();
+	$dataUser = $request->getParsedBody()['user'];
+	$dataAddress = $request->getParsedBody()['address'];
 
 	//check for data, return false if empty
-	if (empty($data)) {
+	if (empty($dataUser)) {
 		return $response->withJson(array('status'=>false,"message"=>'Empty Form!'), 204);
 	}
 	
 	//check if email is valid
-	if (filter_var($data['email'], FILTER_VALIDATE_EMAIL) === false) {
+	if (filter_var($dataUser['email'], FILTER_VALIDATE_EMAIL) === false) {
 		return $response->withJson(array('status'=>false,"message"=>'Invalid Email!'), 412);
 	}
 		
 	//search email and number if it exist
-	$isExist = $this->db->select(array('email'))->from('users')->where('email','=',$data['email']);
+	$isExist = $this->db->select(array('email'))->from('users')->where('email','=',$dataUser['email']);
 	$isExist = $isExist->execute(false);
 	if (!empty($isExist->fetch())) {
 		return $response->withJson(array('status'=>false,"message"=>'User already exist!'), 409);				
 	}
 
 	//check for email and password if empty
-	if (empty($data['password']) || empty($data['email'])) {
+	if (empty($dataUser['password']) || empty($dataUser['email'])) {
 		$response->withJson(array('status'=>false,"message"=>'Email or Password must not be empty!'), 204);
 		return $response;
 	}
 	
 	//password hashing 
-	if (!empty($data['password'])) {
+	if (!empty($dataUser['password'])) {
 		$options = ['cost' => 12,];
-		$passwordFromPost = $data['password'];
-		$data['password'] = password_hash($passwordFromPost, PASSWORD_BCRYPT, $options);		
+		$passwordFromPost = $dataUser['password'];
+		$dataUser['password'] = password_hash($passwordFromPost, PASSWORD_BCRYPT, $options);		
 	}
 	
-	$data['uuid'] = uniqid();
+	$dataUser['uuid'] = uniqid();
 
-	$arrFields = array_keys($data);
-	$arrValues = array_values($data);
+	$arrFields = array_keys($dataUser);
+	$arrValues = array_values($dataUser);
 
 	try {
 		
@@ -97,6 +98,26 @@ $app->post('/user/add', function ( $request, $response, $args) {
 		//Send email ntifiaciton
 		$this->NotificationUtil->emailUserNew($arrResult);
 		
+		//Adding address
+		$dataAddress = $request->getParsedBody()['address'];
+		if ($dataAddress) {
+			$dataAddress['user_id'] = $insertId;
+			$dataAddress['created'] = date('Y-m-d h:i:s');
+			
+			$arrFields = array_keys($dataAddress);
+			$arrValues = array_values($dataAddress);
+			
+			try {
+				// INSERT INTO address ( id , usr , pwd ) VALUES ( ? , ? , ? )
+				$insertStatement = $this->db->insert( $arrFields )
+											->into('addresses')
+											->values($arrValues);
+				$insertId = $insertStatement->execute(true);
+			} catch (Exception $e) {
+				return $response->withJson(array('status'=>false, "message"=> $e->getMessage() ), 500);
+			}
+		}
+		
 		//generate JWT token
 		$token = $this->UserUtil->tokenized($arrResult);
 		
@@ -104,7 +125,7 @@ $app->post('/user/add', function ( $request, $response, $args) {
 				
 	} catch (Exception $e) {
 		
-		return $response->withJson(array('status'=>false, "message"=> $e->getMessage() ), 200);
+		return $response->withJson(array('status'=>false, "message"=> $e->getMessage() ), 500);
 		
 	}
 
@@ -152,7 +173,7 @@ $app->put('/user[/{uuid}]', function ( $request, $response, $args) {
 		
 	} catch (Exception $e) {
 
-		return $response->withJson(array('status'=>false, "message"=>$e->getMessage()),200);
+		return $response->withJson(array('status'=>false, "message"=>$e->getMessage()),500);
 		
 	}
 		
