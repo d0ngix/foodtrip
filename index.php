@@ -50,9 +50,17 @@ $container['db'] = function ($c) {
 // 	$dsn = 'mysql:host=localhost;dbname=foodtrip;charset=utf8';
 // 	$usr = 'root';
 // 	$pwd = '';
- 	$dsn = 'mysql:host=us-cdbr-iron-east-04.cleardb.net;dbname=heroku_9d2a1cfa6f2cfa2;charset=utf8';
- 	$usr = 'b7bed7fbfec968';
- 	$pwd = '79de4384';
+
+	//Heorku connection
+//  	$dsn = 'mysql:host=us-cdbr-iron-east-04.cleardb.net;dbname=heroku_9d2a1cfa6f2cfa2;charset=utf8';
+//  	$usr = 'b7bed7fbfec968';
+//  	$pwd = '79de4384';
+ 	
+ 	//GCLOUD-SQL-173.194.80.224
+ 	$dsn = 'mysql:host=173.194.80.224;dbname=foodtriph;charset=utf8';
+ 	$usr = 'root';
+ 	$pwd = 'd0ngix777';
+ 	
 	$pdo = new \Slim\PDO\Database($dsn, $usr, $pwd);
 	$pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
 	$pdo->setAttribute(PDO::ATTR_DEFAULT_FETCH_MODE, PDO::FETCH_ASSOC);
