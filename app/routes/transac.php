@@ -403,7 +403,7 @@ $app->put('/transac/order/{trasac_uuid}', function($request, $response, $args){
 $app->post('/transac/paypal/verify/{transac_uuid}', function($request, $response, $args){
 	
 	$data = $request->getParsedBody();
-	$paymentId = $data['transac_ref'];
+	$paymentId = $data['payment_ref'];
 	
 	//check user if valid
 	$strUserUuid = $this->jwtToken->user->uuid;
@@ -426,7 +426,7 @@ $app->post('/transac/paypal/verify/{transac_uuid}', function($request, $response
 			//update transaction status			
 			
 			$data['status'] = 2;//status 2 = paid
-			$data['transac_ref'] = $payment->getId();
+			$data['payment_ref'] = $payment->getId();
 			
 			$updateStmt = $this->db->update( $data )
 									->table('transactions')
@@ -437,7 +437,7 @@ $app->post('/transac/paypal/verify/{transac_uuid}', function($request, $response
 			
 		}	
 
-		$data['transac_ref'] = $payment->getId();
+		$data['payment_ref'] = $payment->getId();
 		$data['status'] = $payment->getState();
 		return $response->withJson(array("status" => true, "data" => $data), 200);
 	
