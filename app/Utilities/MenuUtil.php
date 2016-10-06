@@ -13,8 +13,13 @@ class MenuUtil
 	//check if uuid for valid user
 	public function getMenuImages ($data) {
 
-		foreach ($data as $value)
-			$id[] = $value['id'];
+		foreach ($data as $value) {
+			if (!empty($value['menu_id']))
+				$id[] = $value['menu_id'];
+			else 
+				$id[] = $value['id'];
+		}
+			
 
 		$selectStatement = $this->db->select(array("menu_id","path", "is_primary", "name"))->from('menu_images')->whereIn('menu_id', $id);
 		$stmt = $selectStatement->execute(false);

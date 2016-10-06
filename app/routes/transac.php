@@ -200,7 +200,7 @@ $app->get('/transac/orders/all[/{status}]', function($request, $response, $args)
 		}
 		
 		//get items on this transactions
-		$selectStmt = $this->db->select()->from('transaction_items')->whereIn('transaction_id', $arrTransacId );
+		$selectStmt = $this->db->select(['transaction_items.*','menus.id `menu_id`'])->from('transaction_items')->whereIn('transaction_id', $arrTransacId );
 		$selectStmt = $selectStmt->join('menus', 'transaction_items.menu_id','=','menus.id');
 		$selectStmt = $selectStmt->execute();
 		$arrResult = $selectStmt->fetchAll();
@@ -221,10 +221,19 @@ $app->get('/transac/orders/all[/{status}]', function($request, $response, $args)
 		$arrTransacNew = [];
 		foreach ($arrTransac as $v) {
 			$v['items'] = empty($arrResult[$v['id']]) ? "" : $arrResult[$v['id']]; 
-			
+
 			//json_decode add-ons
-			if (!empty($v['items']['add_ons'])) 
-				$v['items']['add_ons'] = json_decode($v['items']['add_ons']);
+			if (!empty($v['items'])) {
+				foreach ($v['items'] as $v1) {
+					
+					if (!empty($v1['add_ons'])) 
+						$v1['add_ons'] = json_decode($v1['add_ons']);
+					
+					$v['items'][] = $v1;
+				}
+				
+				
+			}
 			
 			$arrTransacNew[] = $v;
 		}
