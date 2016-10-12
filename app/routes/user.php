@@ -274,6 +274,34 @@ $app->get('/user/verify/email', function ($request, $response, $args){
 });
 
 /**
+ * Forget Password
+ */
+$app->post('/user/password/reset', function($request, $response, $args){
+	$data = $request->getParsedBody();
+
+	try {
+
+		//get user details
+		$selectUserStatement = $this->db->select()->from('users')->where('email','=',$data['email']);
+		$stmt = $selectUserStatement->execute(false);
+		$dataUser = $stmt->fetch();
+		
+		if(!$dataUser) return $response->withJson(array('status'=>false, "message"=> "User Could Not Be Found!"), 404);
+
+		//send email for the new temporary password
+		if (!$this->NotificationUtil->emailUserResetPassword($dataUser)) 
+			return $response->withJson(array('status'=>false, "message"=> "Opppss.. there seems to be an error!"), 404);
+		
+	} catch (Exception $e) {
+		
+		return $response->withJson(array('status'=>false, "message"=>$e->getMessage()), 500);
+		
+	}
+
+	die;
+});
+
+/**
  * Verify sms
  */
 $app->get('/user/verify/sms', function ($request, $response, $args){

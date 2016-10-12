@@ -52,14 +52,14 @@ $container['db'] = function ($c) {
 // 	$pwd = '';
 
 	//Heorku connection
- 	$dsn = 'mysql:host=us-cdbr-iron-east-04.cleardb.net;dbname=heroku_9d2a1cfa6f2cfa2;charset=utf8';
- 	$usr = 'b7bed7fbfec968';
- 	$pwd = '79de4384';
+//  	$dsn = 'mysql:host=us-cdbr-iron-east-04.cleardb.net;dbname=heroku_9d2a1cfa6f2cfa2;charset=utf8';
+//  	$usr = 'b7bed7fbfec968';
+//  	$pwd = '79de4384';
  	
  	//GCLOUD-SQL-173.194.80.224
-//  	$dsn = 'mysql:host=173.194.80.224;dbname=foodtriph;charset=utf8';
-//  	$usr = 'root';
-//  	$pwd = 'd0ngix777';
+ 	$dsn = 'mysql:host=173.194.80.224;dbname=foodtriph;charset=utf8';
+ 	$usr = 'root';
+ 	$pwd = 'd0ngix777';
  	
 	$pdo = new \Slim\PDO\Database($dsn, $usr, $pwd);
 	$pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
@@ -179,7 +179,7 @@ $app->add(new \Slim\Middleware\JwtAuthentication([
 	"rules" => [
 		new \Slim\Middleware\JwtAuthentication\RequestPathRule([
 			"path" => "/",
-			"passthrough" => ["/user/login","/user/add","/user/verify/"],
+			"passthrough" => ["/user/login","/user/add","/user/verify/","/user/password/reset"],
 		]),
 		/*
 		new \Slim\Middleware\JwtAuthentication\RequestMethodRule([

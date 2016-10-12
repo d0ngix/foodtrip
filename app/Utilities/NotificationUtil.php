@@ -302,6 +302,54 @@ EOT;
 	}	
 	
 	
+	public function emailUserResetPassword ($data) {
+		//Set who the message is to be sent to
+		$this->mail->addAddress("jmbrothers@gmail.com", "$data[first_name] @$data[last_name]");
+		
+		//Set the subject line
+		$this->mail->Subject = '['.$this->manifest->company->name.'] Reset Password';
+		
+		//Read an HTML message body from an external file, convert referenced images to embedded,
+		//convert HTML into a basic plain-text alternative body
+		$this->mail->msgHTML(file_get_contents(ROOT_DIR . "/public/email/emailUserResetPassword.html"));
+		
+		//Replace the firsname place holder
+		$this->mail->Body = str_replace('[USER_FIRSTNAME]', ucfirst($data['first_name']), $this->mail->Body);
+		
+		//Generate email verification
+		$isSSL = empty($_SERVER['HTTPS']) ? 'http' : 'https';
+		$strTempPassword = $this->generatePassword();
+		$this->mail->Body = str_replace('[TEMP_PASSWORD]', $strTempPassword, $this->mail->Body);
+		
+		//Replace the plain text body with one created manually
+		//$this->mail->AltBody = 'This is a plain-text message body';
+		
+		//Attach an image file
+		//$this->mail->addAttachment('images/phpmailer_mini.png');
+		
+		var_dump($this->mail->send());die;
+		//send the message, check for errors
+		if (!$this->mail->send()) {
+			$this->logger->addError("Mailer Error: " . $this->mail->ErrorInfo);
+			return false;
+		}
+		
+		return true;		
+	}
+	
+	public function generatePassword () {
+		 
+		$alphabet = "abcdefghijklmnopqrstuwxyzABCDEFGHIJKLMNOPQRSTUWXYZ0123456789";
+		$pass = array(); //remember to declare $pass as an array
+		$alphaLength = strlen($alphabet) - 1; //put the length -1 in cache
+		for ($i = 0; $i < 8; $i++) {
+			$n = rand(0, $alphaLength);
+			$pass[] = $alphabet[$n];
+		}
+		return implode($pass); //turn the array into a string
+		
+	}
+	
 	//send promotions
 	
 	//send sms verfication
