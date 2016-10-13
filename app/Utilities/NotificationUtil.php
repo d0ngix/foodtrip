@@ -136,8 +136,8 @@ class NotificationUtil {
 				}
 			}
 			
-			$arrItem['price'] = money_format('%i', $arrItem['price']);
-			$arrItem['total_amount'] = money_format('%i', $arrItem['total_amount']);
+			$arrItem['price'] = number_format($arrItem['price'],2);
+			$arrItem['total_amount'] = number_format($arrItem['total_amount'],2);
 			
 			$strItems .= <<<EOT
 				<tr>
@@ -170,14 +170,13 @@ EOT;
 		$this->mail->Body = str_replace('[TRANSAC_DATE]', date('d-M-Y h:iA', strtotime($data['transac']['created'])), $this->mail->Body);
 		$this->mail->Body = str_replace('[TRANSAC_PAYMENT_METHOD]', $data['transac']['payment_method'], $this->mail->Body);
 		$this->mail->Body = str_replace('[TRANSC_ITEMS]', $strItems, $this->mail->Body);
-		$this->mail->Body = str_replace('[TRANSAC_SUBTOTAL]', money_format('%i', $data['transac']['sub_total']), $this->mail->Body);
-		$this->mail->Body = str_replace('[TRANSAC_DISCOUNT]', money_format('%i', $data['transac']['discount']), $this->mail->Body);
-		$this->mail->Body = str_replace('[TRANSAC_DELIVERY_COST]', money_format('%i', $data['transac']['delivery_cost']), $this->mail->Body);
-		$this->mail->Body = str_replace('[TRANSAC_TOTAL_AMOUNT]', money_format('%i', $data['transac']['total_amount']), $this->mail->Body);
-		
+		$this->mail->Body = str_replace('[TRANSAC_SUBTOTAL]', number_format($data['transac']['sub_total'],2), $this->mail->Body);
+		$this->mail->Body = str_replace('[TRANSAC_DISCOUNT]', number_format($data['transac']['discount'],2), $this->mail->Body);
+		$this->mail->Body = str_replace('[TRANSAC_DELIVERY_COST]', number_format($data['transac']['delivery_cost'],2), $this->mail->Body);
+		$this->mail->Body = str_replace('[TRANSAC_TOTAL_AMOUNT]', number_format($data['transac']['total_amount'],2), $this->mail->Body);
 		
 		//Set who the message is to be sent to
-		$this->mail->addAddress($this->jwtToken->user->email, $this->jwt->user->first_name);
+		$this->mail->addAddress($this->jwtToken->user->email, $this->jwtToken->user->first_name);
 		
 		//setup proper email subject 
 		$strSubject = "Order Status Update";
@@ -232,8 +231,8 @@ EOT;
 				}
 			}
 				
-			$arrItem['price'] = money_format('%i', $arrItem['price']);
-			$arrItem['total_amount'] = money_format('%i', $arrItem['total_amount']);
+			$arrItem['price'] = number_format($arrItem['price'], 2);
+			$arrItem['total_amount'] = number_format($arrItem['total_amount'], 2);
 				
 			$strItems .= <<<EOT
 				<tr>
@@ -264,11 +263,11 @@ EOT;
 		$this->mail->Body = str_replace('[TRANSAC_REF]', $data['transac']['uuid'], $this->mail->Body);
 		$this->mail->Body = str_replace('[TRANSAC_DATE]', date('d-M-Y h:iA', strtotime($data['transac']['created'])), $this->mail->Body);
 		$this->mail->Body = str_replace('[TRANSAC_PAYMENT_METHOD]', $data['transac']['payment_method'], $this->mail->Body);
-		$this->mail->Body = str_replace('[TRANSC_ITEMS]', $strItems, $this->mail->Body);
-		$this->mail->Body = str_replace('[TRANSAC_SUBTOTAL]', money_format('%i', $data['transac']['sub_total']), $this->mail->Body);
-		$this->mail->Body = str_replace('[TRANSAC_DISCOUNT]', money_format('%i', $data['transac']['discount']), $this->mail->Body);
-		$this->mail->Body = str_replace('[TRANSAC_DELIVERY_COST]', money_format('%i', $data['transac']['delivery_cost']), $this->mail->Body);
-		$this->mail->Body = str_replace('[TRANSAC_TOTAL_AMOUNT]', money_format('%i', $data['transac']['total_amount']), $this->mail->Body);
+		$this->mail->Body = str_replace('[TRANSAC_ITEMS]', $strItems, $this->mail->Body);
+		$this->mail->Body = str_replace('[TRANSAC_SUBTOTAL]', number_format($data['transac']['sub_total'], 2), $this->mail->Body);
+		$this->mail->Body = str_replace('[TRANSAC_DISCOUNT]', number_format($data['transac']['discount'], 2), $this->mail->Body);
+		$this->mail->Body = str_replace('[TRANSAC_DELIVERY_COST]', number_format($data['transac']['delivery_cost'], 2), $this->mail->Body);
+		$this->mail->Body = str_replace('[TRANSAC_TOTAL_AMOUNT]', number_format($data['transac']['total_amount'], 2), $this->mail->Body);
 
 
 		//Set who the message is to be sent to

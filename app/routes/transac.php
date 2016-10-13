@@ -99,9 +99,14 @@ $app->post('/transac', function ($request, $response, $args) {
 			if (empty($value['add_ons']))  unset($value['add_ons']);
 			
 			$value['transaction_id'] = $intTransacId; 
-					
+			
+			$value['discount'] = number_format( floatval($value['discount']), 2);
+			$value['price'] = number_format($value['price'],2);
+			
 			$arrFields = array_keys($value);
 			$arrValues = array_values($value);
+// 			var_dump($value);
+// 			die;
 						
 			//insert into items table
 			$insertStatement = $this->db->insert( $arrFields )
@@ -227,7 +232,7 @@ $app->get('/transac/orders/all[/{status}]', function($request, $response, $args)
 				foreach ($v['items'] as $v1) {
 					
 					if (!empty($v1['add_ons'])) 
-						$v1['add_ons'] = json_decode($v1['add_ons']);
+						$v1['add_ons'] = json_decode($v1['add_ons'], true);
 					
 					$v['items'][] = $v1;
 				}
