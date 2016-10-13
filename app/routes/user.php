@@ -177,7 +177,7 @@ $app->put('/user[/{uuid}]', function ( $request, $response, $args) {
 									->where('uuid', '=', $args['uuid']);
 		$blnResult = $updateStatement->execute(true);
 		
-		if (!empty($data['password'])) $data['password'] = "Successful Reset";
+		if (!empty($data['password'])) $data['password'] = "**********";
 		
 		return $response->withJson(array('status'=>true, "data"=>$data), 200);		
 		
