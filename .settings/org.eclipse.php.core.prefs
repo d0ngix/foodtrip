@@ -1,5 +1,3 @@
 eclipse.preferences.version=1
-include_path=0;/foodtrip
-phpVersion=php5.4
-useShortTags=true
+include_path=0;/foodtriph.api
 use_asp_tags_as_php=false
