@@ -302,14 +302,7 @@ $app->post('/user/password/reset', function($request, $response, $args){
 		if (!$this->NotificationUtil->emailUserResetPassword($dataUser, $strPassword)) 
 			return $response->withJson(array('status'=>false, "message"=> "Opppss.. there seems to be an error!"), 404);
 		
-		var_dump($dataUser);
-		var_dump($blnResult);die;
-
-		unset($dataUser['password']);
-		var_dump($dataUser);
-		die;
-		
-
+		return $response->withJson(array('status'=>true, "message"=> "Password has been reset successfully"), 200);
 		
 	} catch (Exception $e) {
 		
