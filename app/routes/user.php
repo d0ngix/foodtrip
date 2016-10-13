@@ -280,17 +280,36 @@ $app->post('/user/password/reset', function($request, $response, $args){
 	$data = $request->getParsedBody();
 
 	try {
-
 		//get user details
-		$selectUserStatement = $this->db->select()->from('users')->where('email','=',$data['email']);
+		$selectUserStatement = $this->db->select(['password','id','email','first_name','last_name'])->from('users')->where('email','=',$data['email']);
 		$stmt = $selectUserStatement->execute(false);
 		$dataUser = $stmt->fetch();
 		
+		$strPassword = $this->UserUtil->generatePassword();
+		$dataUser['password'] = password_hash($strPassword, PASSWORD_BCRYPT, ['cost' => 12]);
+		
 		if(!$dataUser) return $response->withJson(array('status'=>false, "message"=> "User Could Not Be Found!"), 404);
+		
+		$updateStatement = $this->db->update( $dataUser )
+									->table('users')
+									->where('id', '=', $dataUser['id']);
+		$blnResult = $updateStatement->execute(true);
 
+		if (!$blnResult)
+			return $response->withJson(array('status'=>false, "message"=> "Error Generating Password"), 500);
+		 
 		//send email for the new temporary password
-		if (!$this->NotificationUtil->emailUserResetPassword($dataUser)) 
+		if (!$this->NotificationUtil->emailUserResetPassword($dataUser, $strPassword)) 
 			return $response->withJson(array('status'=>false, "message"=> "Opppss.. there seems to be an error!"), 404);
+		
+		var_dump($dataUser);
+		var_dump($blnResult);die;
+
+		unset($dataUser['password']);
+		var_dump($dataUser);
+		die;
+		
+
 		
 	} catch (Exception $e) {
 		

@@ -11,7 +11,10 @@ class UserUtil
 			
 	}	
 
-	//check if uuid for valid user
+/**
+ * @method checkUser - check if uuid for valid user
+ * @return int userId 
+ */	
 	public function checkUser ($strUuid) {
 		
 		$isUserExist = $this->db->select(array('id'))->from('users')->where('uuid','=',$strUuid);
@@ -23,7 +26,10 @@ class UserUtil
 	
 	}
 	
-	//check if uuid for valid vendor
+/**
+ * @method checkVendor - check if uuid for valid vendor
+ * @return int vendorId
+ */
 	public function checkVendor ($strUuid) {
 	
 		$pdoObject = $this->db->select(array('id'))->from('vendors')->where('uuid','=',$strUuid);
@@ -57,7 +63,23 @@ class UserUtil
 		
 	}
 	
+/**
+ * @method generatePassword - generate new password
+ * @return string
+ */	
+	public function generatePassword () {
+			
+		$alphabet = "abcdefghijklmnopqrstuwxyzABCDEFGHIJKLMNOPQRSTUWXYZ0123456789";
+		$pass = array(); //remember to declare $pass as an array
+		$alphaLength = strlen($alphabet) - 1; //put the length -1 in cache
+		for ($i = 0; $i < 8; $i++) {
+			$n = rand(0, $alphaLength);
+			$pass[] = $alphabet[$n];
+		}
+		
+		return implode($pass); //turn the array into a string
 	
+	}
 
 		
 }

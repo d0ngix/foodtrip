@@ -300,8 +300,12 @@ EOT;
 	
 	}	
 	
-	
-	public function emailUserResetPassword ($data) {
+/**
+ * emailUserResetPassword - Sending new password
+ * @return boolean
+ */	
+	public function emailUserResetPassword ($data, $strPassword) {
+
 		//Set who the message is to be sent to
 		$this->mail->addAddress("jmbrothers@gmail.com", "$data[first_name] @$data[last_name]");
 		
@@ -317,8 +321,7 @@ EOT;
 		
 		//Generate email verification
 		$isSSL = empty($_SERVER['HTTPS']) ? 'http' : 'https';
-		$strTempPassword = $this->generatePassword();
-		$this->mail->Body = str_replace('[TEMP_PASSWORD]', $strTempPassword, $this->mail->Body);
+		$this->mail->Body = str_replace('[TEMP_PASSWORD]', $strPassword, $this->mail->Body);
 		
 		//Replace the plain text body with one created manually
 		//$this->mail->AltBody = 'This is a plain-text message body';
@@ -326,7 +329,6 @@ EOT;
 		//Attach an image file
 		//$this->mail->addAttachment('images/phpmailer_mini.png');
 		
-		var_dump($this->mail->send());die;
 		//send the message, check for errors
 		if (!$this->mail->send()) {
 			$this->logger->addError("Mailer Error: " . $this->mail->ErrorInfo);
@@ -336,18 +338,6 @@ EOT;
 		return true;		
 	}
 	
-	public function generatePassword () {
-		 
-		$alphabet = "abcdefghijklmnopqrstuwxyzABCDEFGHIJKLMNOPQRSTUWXYZ0123456789";
-		$pass = array(); //remember to declare $pass as an array
-		$alphaLength = strlen($alphabet) - 1; //put the length -1 in cache
-		for ($i = 0; $i < 8; $i++) {
-			$n = rand(0, $alphaLength);
-			$pass[] = $alphabet[$n];
-		}
-		return implode($pass); //turn the array into a string
-		
-	}
 	
 	//send promotions
 	
