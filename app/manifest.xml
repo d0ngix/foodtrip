@@ -12,7 +12,7 @@
 		<CharSet>UTF-8</CharSet>		
 		
 		<!-- Tell PHPMailer to use SMTP -->
-		$this->mail->isSMTP();
+		<!-- $this->mail->isSMTP(); -->
 		
 		<!-- 
 		Enable SMTP debugging
@@ -20,6 +20,7 @@
 		  1 = client messages
 		  2 = client and server messages
 		 -->
+		 
 		<SMTPDebug>0</SMTPDebug>
 		
 		<!-- Ask for HTML-friendly debug output -->
@@ -42,7 +43,7 @@
 			<Username>d0ngix.mabulay@gmail.com</Username>
 			
 			<!-- Password to use for SMTP authentication -->
-			<Password>d0ngix777</Password>			
+			<Password>JGMwp2009</Password>			
 		</account>
 		
 		<!-- Set who the message is to be sent from -->
