@@ -225,6 +225,7 @@ $app->get('/transac/orders/all[/{status}]', function($request, $response, $args)
 		//set the items of each transactions
 		$arrTransacNew = [];
 		foreach ($arrTransac as $v) {
+			$vNew = [];
 			$v['items'] = empty($arrResult[$v['id']]) ? "" : $arrResult[$v['id']]; 
 
 			//json_decode add-ons
@@ -234,16 +235,15 @@ $app->get('/transac/orders/all[/{status}]', function($request, $response, $args)
 					if (!empty($v1['add_ons'])) 
 						$v1['add_ons'] = json_decode($v1['add_ons'], true);
 					
-					$v['items'][] = $v1;
+					$vNew['items'][] = $v1;
 				}
-				
-				
+				$v['items'] = $vNew['items'];
 			}
 			
 			$arrTransacNew[] = $v;
 		}
 		$arrTransac = $arrTransacNew;
-
+		
 		return $response->withJson(array("status" => true, "data" =>$arrTransac), 200);
 
 	} catch (Exception $e) {
