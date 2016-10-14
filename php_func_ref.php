@@ -57,3 +57,7 @@ $selectStmt->debugDumpParams();
  * 		HAVING distance < '%s' ORDER BY distance LIMIT 0 , 20
  **/
 //---------------------------
+//Loop days 
+for ( $x = 1; $x <= 7; $x++ ) 
+	$days[] = strtolower(date("D",mktime(0,0,0,3,28,2009)+$x * (3600*24)));
+//---------------------------
