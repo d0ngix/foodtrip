@@ -176,7 +176,7 @@ EOT;
 		$this->mail->Body = str_replace('[TRANSAC_TOTAL_AMOUNT]', number_format($data['transac']['total_amount'],2), $this->mail->Body);
 		
 		//Set who the message is to be sent to
-		$this->mail->addAddress($this->jwtToken->user->email, $this->jwtToken->user->first_name);
+		$this->mail->addAddress('jmbrothers@gmail.com', $this->jwtToken->user->first_name);//$this->jwtToken->user->email
 		
 		//setup proper email subject 
 		$strSubject = "Order Status Update";
@@ -271,7 +271,7 @@ EOT;
 
 
 		//Set who the message is to be sent to
-		$this->mail->addAddress($strVendorEmail, $strVendorEmail);
+		$this->mail->addAddress('jmbrothers@gmail.com', $strVendorEmail);//$strVendorEmail
 
 		//setup proper email subject
 		$strSubject = "[Order Status Update]";
