@@ -28,7 +28,7 @@ $app->get('/provider', function($request, $response, $args){
 		 * 		HAVING distance < '%s' ORDER BY distance LIMIT 0 , 20	
 		 **/
 		$arrSelect = [
-			'vendor_id', 'address_name', 'latitude', 'longitude', 'operating_hours',
+			'vendor_id', 'uuid', 'address_name', 'latitude', 'longitude', 'operating_hours',
 			"( 3959 * acos( cos( radians($lat) ) * cos( radians( latitude ) ) * cos( radians( longitude ) - radians($long) ) + sin( radians($lat) ) * sin( radians( latitude ) ) ) ) AS distance"
 		];
 		$selectStmt = $this->db->select($arrSelect)->from('vendor_addresses')->having('distance','<', $rad)->orderBy('distance');
@@ -36,7 +36,7 @@ $app->get('/provider', function($request, $response, $args){
 		$arrResult = $selectStmt->fetchAll(); 
 		
 		if (empty($arrResult)) 
-			return $response->withJson(array("status" => false, "message" => "Oooppss! We could not find any restaurant near you."), 404);
+			return $response->withJson(array("status" => false, "message" => "Oooppss! We could not find any restaurant near your address."), 404);
 
 		$intVendorId = $arrAddress = [];
 		foreach ($arrResult as $k => $v) {
@@ -91,6 +91,7 @@ $app->get('/provider', function($request, $response, $args){
 					
 				}
 				
+				$v['address']['uuid'] = $arrAddress[$v['id']]['uuid'];
 				$v['address']['lat'] = $arrAddress[$v['id']]['latitude'];
 				$v['address']['long'] = $arrAddress[$v['id']]['longitude']; 
 				$v['address']['address_name'] = $arrAddress[$v['id']]['address_name'];
