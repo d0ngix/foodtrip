@@ -48,9 +48,9 @@ class TransacUtil {
 		if(!empty($intStatus))
 			$arrWhere['status'] = $intStatus;
 
-		$selectStmt = $this->db->select()->from('transactions');
+		$selectStmt = $this->db->select(['transactions.*','vendors.name as vendor_name'])->from('transactions');
+		$selectStmt = $selectStmt->join('vendors','transactions.vendor_id','=','vendors.id');
 		$selectStmt = $selectStmt->whereMany($arrWhere,'=');
-				
 		$selectStmt = $selectStmt->execute();
 		
 		if (!empty($strUuid)) //Single Transaction
