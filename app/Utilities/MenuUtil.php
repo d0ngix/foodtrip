@@ -19,7 +19,6 @@ class MenuUtil
 			else 
 				$id[] = $value['id'];
 		}
-			
 
 		$selectStatement = $this->db->select(array("menu_id","path", "is_primary", "name"))->from('menu_images')->whereIn('menu_id', $id);
 		$stmt = $selectStatement->execute(false);

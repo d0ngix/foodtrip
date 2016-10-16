@@ -73,16 +73,19 @@ $app->get('/menu/all/{vendor_uuid}', function ($request, $response, $args) {
 		if (!empty($data)) {
 			//un-json the add_ons details
 			foreach ($data as $v) {
-				if (!empty($v['add_ons'])) {
+				
+				if (!empty($v['add_ons'])) 
 					$v['add_ons'] = json_decode($v['add_ons'],true);
-				}
+				
+				if (!empty($v['photo']))
+					$v['photo'] = json_decode($v['photo'],true);
 				
 				$arrNewResult[] = $v;
 			}
 			$data = $arrNewResult;
 			
 			$blnRatings = $this->MenuUtil->getRatings($data);
-			$data = $this->MenuUtil->getMenuImages($data);			
+			//$data = $this->MenuUtil->getMenuImages($data);			
 		}
 		
 		return $response->withJson(array("status" => true, "data" => $data), 200);

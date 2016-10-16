@@ -31,9 +31,12 @@ $app->get('/provider', function($request, $response, $args){
 			'vendor_id', 'uuid', 'address_name', 'latitude', 'longitude', 'operating_hours',
 			"( 3959 * acos( cos( radians($lat) ) * cos( radians( latitude ) ) * cos( radians( longitude ) - radians($long) ) + sin( radians($lat) ) * sin( radians( latitude ) ) ) ) AS distance"
 		];
-		$selectStmt = $this->db->select($arrSelect)->from('vendor_addresses')->having('distance','<', $rad)->orderBy('distance');
+		$selectStmt = $this->db->select($arrSelect)->from('vendor_addresses')
+													->whereMany(['deleted' => '0', 'active' => '1'], '=')
+													->having('distance','<', $rad)
+													->orderBy('distance');
 		$selectStmt = $selectStmt->execute();
-		$arrResult = $selectStmt->fetchAll(); 
+		$arrResult = $selectStmt->fetchAll();
 		
 		if (empty($arrResult)) 
 			return $response->withJson(array("status" => false, "message" => "Oooppss! We could not find any restaurant near your address."), 404);
@@ -45,7 +48,7 @@ $app->get('/provider', function($request, $response, $args){
 		}
 
 		//Get the vendors list
-		$selectStmt = $this->db->select()->from('vendors')->whereIn('id',$intVendorId);		
+		$selectStmt = $this->db->select()->from('vendors')->whereIn('id',$intVendorId)->where('deleted','=','0');		
 		$selectStmt = $selectStmt->execute();
 		$arrResult = $selectStmt->fetchAll();		
 		
