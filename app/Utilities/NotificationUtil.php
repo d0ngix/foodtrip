@@ -77,8 +77,8 @@ class NotificationUtil {
 	public function emailUserNew($data) {
 
 		//Set who the message is to be sent to
-		//$this->mail->addAddress($data['email'], "$data[first_name] @$data[last_name]");
-		$this->mail->addAddress("jmbrothers@gmail.com", "$data[first_name] @$data[last_name]");
+		$this->mail->addAddress($data['email'], "$data[first_name] @$data[last_name]");
+		//$this->mail->addAddress("jmbrothers@gmail.com", "$data[first_name] @$data[last_name]");
 		
 		//Set the subject line
 		$this->mail->Subject = '['.$this->manifest->company->name.'] Email Verification';
@@ -176,7 +176,8 @@ EOT;
 		$this->mail->Body = str_replace('[TRANSAC_TOTAL_AMOUNT]', number_format($data['transac']['total_amount'],2), $this->mail->Body);
 		
 		//Set who the message is to be sent to
-		$this->mail->addAddress('jmbrothers@gmail.com', $this->jwtToken->user->first_name);//$this->jwtToken->user->email
+		$this->mail->addAddress($this->jwtToken->user->email, $this->jwtToken->user->first_name);
+		//$this->mail->addAddress('jmbrothers@gmail.com', $this->jwtToken->user->first_name);
 		
 		//setup proper email subject 
 		$strSubject = "Order Status Update";
@@ -271,7 +272,8 @@ EOT;
 
 
 		//Set who the message is to be sent to
-		$this->mail->addAddress('jmbrothers@gmail.com', $strVendorEmail);//$strVendorEmail
+		//$this->mail->addAddress($strVendorEmail, $strVendorEmail);
+		$this->mail->addAddress('d0ngix.mabulay@gmail.com', $strVendorEmail);
 
 		//setup proper email subject
 		$strSubject = "[Order Status Update]";
@@ -307,7 +309,8 @@ EOT;
 	public function emailUserResetPassword ($data, $strPassword) {
 
 		//Set who the message is to be sent to
-		$this->mail->addAddress("jmbrothers@gmail.com", "$data[first_name] @$data[last_name]");
+		$this->mail->addAddress($data['email'], "$data[first_name] @$data[last_name]");
+		//$this->mail->addAddress("jmbrothers@gmail.com", "$data[first_name] @$data[last_name]");
 		
 		//Set the subject line
 		$this->mail->Subject = '['.$this->manifest->company->name.'] Reset Password';
