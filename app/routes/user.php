@@ -16,16 +16,7 @@ $app->get('/user/{uuid}', function ( $request, $response, $args) {
 			return $response->withJson(array('status'=>false, 'message'=>'Unauthorized Access!'), 401);
 		
 		//get user details
-		$selectUserStatement = $this->db->select()->from('users')->where('uuid','=',$strUserUuid);
-		$stmt = $selectUserStatement->execute(false);
-		$dataUser = $stmt->fetch();
-		
-		//get user addresses
-		$selectStatement = $this->db->select()->from('addresses')->where('user_id','=',$dataUser['id']);
-		$selectStatement = $selectStatement->execute(false);
-		$dataAddress = $selectStatement->fetchAll();		
-		
-		$data = ['user' => $dataUser,'addresses' => $dataAddress];
+		$data = $this->UserUtil->getUserDetails($strUserUuid);
 		
 		if (!$data['user'])
 			return $response->withJson(array('status'=>false, 'message'=>'User Not Found!'), 200); 
@@ -143,7 +134,7 @@ $app->post('/user/add', function ( $request, $response, $args) {
 /* *
  * Update User Details
  * */
-$app->put('/user[/{uuid}]', function ( $request, $response, $args) {
+$app->put('/user/{uuid}', function ( $request, $response, $args) {
 
 	$data = $request->getParsedBody();
 				
@@ -178,6 +169,9 @@ $app->put('/user[/{uuid}]', function ( $request, $response, $args) {
 		$blnResult = $updateStatement->execute(true);
 		
 		if (!empty($data['password'])) $data['password'] = "**********";
+		
+		//get user details
+		$data = $this->UserUtil->getUserDetails($args['uuid']);
 		
 		return $response->withJson(array('status'=>true, "data"=>$data), 200);		
 		

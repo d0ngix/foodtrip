@@ -81,5 +81,29 @@ class UserUtil
 	
 	}
 
+/**
+ * @method getUserDetails - return all user details + user stored addresses
+ * @return array
+ */
+	public function getUserDetails ($strUserUuid) {
+		$selectUserStatement = $this->db->select()->from('users')->where('uuid','=',$strUserUuid);
+		$stmt = $selectUserStatement->execute(false);
+		$dataUser = $stmt->fetch();
 		
+		if (!empty($dataUser['photo']))
+			$dataUser['photo'] = json_decode($dataUser['photo'], true);
+		
+		if (!empty($dataUser['password']))
+			unset($dataUser['password']);
+		
+		//get user addresses
+		$selectStatement = $this->db->select()->from('addresses')->where('user_id','=',$dataUser['id']);
+		$selectStatement = $selectStatement->execute(false);
+		$dataAddress = $selectStatement->fetchAll();
+		
+		if (!empty($dataUser))
+			return ['user' => $dataUser,'addresses' => $dataAddress];
+
+		return false;
+	}
 }
