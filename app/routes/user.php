@@ -21,9 +21,9 @@ $app->get('/user/{uuid}', function ( $request, $response, $args) {
 		if (!$data['user'])
 			return $response->withJson(array('status'=>false, 'message'=>'User Not Found!'), 200); 
 		
-		//un-json the photo details
-		if (!empty($data['user']['photo']))
-			$data['user']['photo'] = json_decode($data['user']['photo'],true);
+// 		//un-json the photo details
+// 		if (!empty($data['user']['photo']))
+// 			$data['user']['photo'] = json_decode($data['user']['photo'],true);
 		
 		//remove the password
 		unset($data['user']['password']);
