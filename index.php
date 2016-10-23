@@ -47,20 +47,11 @@ $container = $app->getContainer();
  **********************************************************************/
 //Adding Database connection to Container
 $container['db'] = function ($c) {
-// 	$dsn = 'mysql:host=localhost;dbname=foodtriph;charset=utf8';
-// 	$usr = 'root';
-// 	$pwd = 'd0ngix777';
 
-	//Heorku connection
-//  	$dsn = 'mysql:host=us-cdbr-iron-east-04.cleardb.net;dbname=heroku_9d2a1cfa6f2cfa2;charset=utf8';
-//  	$usr = 'b7bed7fbfec968';
-//  	$pwd = '79de4384';
- 	
- 	//GCLOUD-SQL-173.194.80.224
- 	$dsn = 'mysql:host=173.194.108.238;dbname=foodtriph;charset=utf8';
- 	$usr = 'root';
- 	$pwd = 'd0ngix777';
- 	
+	$dsn = 'mysql:host='.$_ENV['MYSQL_HOST'].';dbname='.$_ENV['MYSQL_DB'].';charset=utf8';
+	$usr = $_ENV['MYSQL_USER'];
+	$pwd = $_ENV['MYSQL_PWD'];	
+	
 	$pdo = new \Slim\PDO\Database($dsn, $usr, $pwd);
 	$pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
 	$pdo->setAttribute(PDO::ATTR_DEFAULT_FETCH_MODE, PDO::FETCH_ASSOC);
