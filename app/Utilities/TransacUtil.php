@@ -30,7 +30,7 @@ class TransacUtil {
 		
 		foreach ( $data as $value ) {
 			//var_dump($value);
-			if ($value['price'] !== $arrDataMenu[$value['menu_id']]['price'] ) 
+			if ( abs($value['price']) !== abs($arrDataMenu[$value['menu_id']]['price']) ) 
 				return false;
 		}
 		
