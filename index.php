@@ -164,7 +164,7 @@ $container['NotificationUtil'] = function ($c) {
 $app->add(new \Slim\Middleware\JwtAuthentication([
     "secret" => "supersecretkeyyoushouldnotcommittogithub", //TODO: Use https://github.com/vlucas/phpdotenv
     "secure" => true,
-    "relaxed" => ["localhost", "foodtriph-api.herokuapp.com"],
+    "relaxed" => ["localhost", "foodtriph-api.herokuapp.com","api.foodtri.ph"],
 	//"logger" => $logger,
 		
 	"rules" => [
