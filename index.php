@@ -48,9 +48,13 @@ $container = $app->getContainer();
 //Adding Database connection to Container
 $container['db'] = function ($c) {
 
-	$dsn = 'mysql:host='.$_ENV['MYSQL_HOST'].';dbname='.$_ENV['MYSQL_DB'].';charset=utf8';
-	$usr = $_ENV['MYSQL_USER'];
-	$pwd = $_ENV['MYSQL_PWD'];	
+// 	$dsn = 'mysql:host='.$_SERVER['MYSQL_HOST'].';dbname='.$_SERVER['MYSQL_DB'].';charset=utf8';
+// 	$usr = $_SERVER['MYSQL_USER'];
+// 	$pwd = $_SERVER['MYSQL_PWD'];	
+
+	$dsn = 'mysql:host=localhost;dbname=foodtriph;charset=utf8';
+	$usr = 'root';
+	$pwd = 'd0ngix777';	
 	
 	$pdo = new \Slim\PDO\Database($dsn, $usr, $pwd);
 	$pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
