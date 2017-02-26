@@ -1,4 +1,14 @@
 <?php
+/* DO NOT PUSH TO BITBUCKET - START */
+$_ENV['MYSQL_HOST'] = '192.168.1.4';
+$_ENV['MYSQL_DB'] = 'foodtriph';
+$_ENV['MYSQL_USER'] = 'root';
+$_ENV['MYSQL_PWD'] = 'd0ngix777';
+$_ENV['JWT_SECRET'] = 'thequickbrownfoxjumpsoverthelazydog97545389';
+$_ENV['PAYPAL_CLIENT_ID'] = 'AcN1vThV_mxNQ2H2PQnQqugHTtup_wmS9nO6CYrO0OT1zkM18RxvLHcgUE39thiq8ugQqdqu7faR20GN';
+$_ENV['PAYPAL_CLIENT_SECRET'] = 'EI4mfCDgr8uTr5Nbme0W5mu9mmBXRo_p52SCs9a7WzSDPp44-NI_b_k9lIPU8hMdMOYiidFS8URCLMWO';
+/* DO NOT PUSH TO BITBUCKET - END */
+
 use Psr\Http\Message\ServerRequestInterface;
 use Psr\Http\Message\ResponseInterface;
 
@@ -48,14 +58,10 @@ $container = $app->getContainer();
 //Adding Database connection to Container
 $container['db'] = function ($c) {
 
-// 	$dsn = 'mysql:host='.$_SERVER['MYSQL_HOST'].';dbname='.$_SERVER['MYSQL_DB'].';charset=utf8';
-// 	$usr = $_SERVER['MYSQL_USER'];
-// 	$pwd = $_SERVER['MYSQL_PWD'];	
+ 	$dsn = 'mysql:host='.$_ENV['MYSQL_HOST'].';dbname='.$_ENV['MYSQL_DB'].';charset=utf8';
+ 	$usr = $_ENV['MYSQL_USER'];
+ 	$pwd = $_ENV['MYSQL_PWD'];	
 
-	$dsn = 'mysql:host=localhost;dbname=foodtriph;charset=utf8';
-	$usr = 'root';
-	$pwd = 'd0ngix777';	
-	
 	$pdo = new \Slim\PDO\Database($dsn, $usr, $pwd);
 	$pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
 	$pdo->setAttribute(PDO::ATTR_DEFAULT_FETCH_MODE, PDO::FETCH_ASSOC);
@@ -88,8 +94,8 @@ use PayPal\Rest\ApiContext;
 use PayPal\Auth\OAuthTokenCredential;
 $container["PaypalApiContext"] = function ($container) {
 	//TODO: put it in an environment variables
-	$clientId = 'AcN1vThV_mxNQ2H2PQnQqugHTtup_wmS9nO6CYrO0OT1zkM18RxvLHcgUE39thiq8ugQqdqu7faR20GN';	 
-	$clientSecret = 'EI4mfCDgr8uTr5Nbme0W5mu9mmBXRo_p52SCs9a7WzSDPp44-NI_b_k9lIPU8hMdMOYiidFS8URCLMWO';
+	$clientId = $_ENV['PAYPAL_CLIENT_ID']; 	 
+	$clientSecret = $_ENV['PAYPAL_CLIENT_SECRET'];
 
 	$apiContext = new ApiContext(
 			new OAuthTokenCredential(
@@ -166,9 +172,9 @@ $container['NotificationUtil'] = function ($c) {
  **********************************************************************/
 
 $app->add(new \Slim\Middleware\JwtAuthentication([
-    "secret" => "supersecretkeyyoushouldnotcommittogithub", //TODO: Use https://github.com/vlucas/phpdotenv
+    "secret" => $_ENV['JWT_SECRET'], //TODO: Use https://github.com/vlucas/phpdotenv
     "secure" => true,
-    "relaxed" => ["localhost", "foodtriph-api.herokuapp.com","api.foodtri.ph"],
+    "relaxed" => ["localhost", "foodtriph-api.herokuapp.com","api.foodtri.ph","api-foodtriph.ddns.net"],
 	//"logger" => $logger,
 		
 	"rules" => [

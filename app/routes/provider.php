@@ -33,7 +33,7 @@ $app->get('/provider', function($request, $response, $args){
 		];
 		$selectStmt = $this->db->select($arrSelect)->from('vendor_addresses')
 													->whereMany(['deleted' => '0', 'active' => '1'], '=')
-													->having('distance','<', $rad)
+													//->having('distance','<', $rad)
 													->orderBy('distance');
 		$selectStmt = $selectStmt->execute();
 		$arrResult = $selectStmt->fetchAll();
@@ -55,9 +55,16 @@ $app->get('/provider', function($request, $response, $args){
 		if (!empty($arrResult)) {
 			//un-json the photo details
 			foreach ($arrResult as $v) {
+				
+				$arrMeetUpLocation = null;
+				
 				if (!empty($v['photo'])) {
 					$v['photo'] = json_decode($v['photo'],true);
-					$v['photo']['dimensions'] = json_decode($v['photo']['dimensions'],true);
+					
+					/*					
+					if (!empty($v['photo']['dimensions']))
+						$v['photo']['dimensions'] = @json_decode($v['photo']['dimensions'],true);
+					*/
 					
 					//unset the unnecessary
 					unset($v['photo']['extension']);
@@ -73,26 +80,45 @@ $app->get('/provider', function($request, $response, $args){
 				if (!empty($arrAddress[$v['id']]['operating_hours'])) {
 					$vendorAddress =$arrAddress[$v['id']];
 					$arrSched = json_decode($vendorAddress['operating_hours'], true);
-					
-					//compare current day/time if open
-					$strDay = strtolower(date('D'));
-					array_walk($arrSched, function ($i, $k) use (&$strDay, &$v) {
-						if(!empty($i[$strDay])) {
-							$timeNow = time();//current server time
-							$timeStart = date('U', strtotime($i[$strDay]['start']));
-							$timeEnd = date('U', strtotime($i[$strDay]['end']));
-							
-							if ($timeStart <= $timeNow && $timeNow <= $timeEnd) {
-								$v['open'] = true;
+					if ( !empty($arrSched) ) {
+						//compare current day/time if open
+						$strDay = strtolower(date('D'));
+						array_walk($arrSched, function ($i, $k) use (&$strDay, &$v) {
+							if(!empty($i[$strDay])) {
+								$timeNow = time();//current server time
+								$timeStart = date('U', strtotime($i[$strDay]['start']));
+								$timeEnd = date('U', strtotime($i[$strDay]['end']));
+								
+								if ($timeStart <= $timeNow && $timeNow <= $timeEnd) {
+									$v['open'] = true;
+								}
+								$v['open'] = true;//Alway Open
+								
+								$v['operating_hours']['start'] = $i[$strDay]['start'];
+								$v['operating_hours']['end'] = $i[$strDay]['end'];
+	 							//var_dump("$timeStart <= $timeNow <= $timeEnd");
+	 							
+								
+							} 
+						});
+
+						//set meetup location selection list
+						foreach ( $arrSched as $v1 ) {
+							if ( key($v1)  === 'freetext' && !empty($v1[key($v1)]) ) {
+								$arrMeetUpLocation[] = $v1[key($v1)];
+								$v['meetup'][] = $v1[key($v1)];
+								continue;
 							}
 							
-							$v['operating_hours']['start'] = $i[$strDay]['start'];
-							$v['operating_hours']['end'] = $i[$strDay]['end'];
- 							//var_dump("$timeStart <= $timeNow <= $timeEnd");
-						} 
-					});				
-					
-				}
+							if (!empty($v1[key($v1)]['loc'])) {
+								$arrMeetUpLocation[] = ucfirst(key($v1)) . ' ' . $v1[key($v1)]['start'] . ' - ' . $v1[key($v1)]['end'] . ' @ ' . $v1[key($v1)]['loc'];
+								$v['meetup'][] = ucfirst(key($v1)) . ' ' . $v1[key($v1)]['start'] . ' - ' . $v1[key($v1)]['end'] . ' @ ' . $v1[key($v1)]['loc'];
+							}
+						}//endforeach
+						
+					}//endif
+
+				}//Endif 
 				
 				$v['address']['uuid'] = $arrAddress[$v['id']]['uuid'];
 				$v['address']['lat'] = $arrAddress[$v['id']]['latitude'];
@@ -100,7 +126,8 @@ $app->get('/provider', function($request, $response, $args){
 				$v['address']['address_name'] = $arrAddress[$v['id']]['address_name'];
 
 				$arrNewResult[] = $v;
-			}
+			}//endforeach
+			
 			$arrResult = $arrNewResult;
 		}
 

@@ -193,7 +193,8 @@ $app->post('/user/login', function ($request, $response, $args) {
 	try {
 		
 		//search for the user
-		$selectStmt = $this->db->select()->from('users')->where('email','=',$data['email']);
+		$selectStmt = $this->db->select()->from('users')->where('users.email','=',$data['email'])
+														->join('addresses', 'users.id','=', 'addresses.user_id');
 		$selectStmt = $selectStmt->execute();
 		$arrResult = $selectStmt->fetch();		
 

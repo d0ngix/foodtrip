@@ -56,7 +56,7 @@ class UserUtil
 			//"sub" => $server["PHP_AUTH_USER"],
 		];
 		
-		$secret = "supersecretkeyyoushouldnotcommittogithub";
+		$secret = $_ENV['JWT_SECRET'];
 		$token = $this->jwt->encode($payload, $secret, "HS256");
 
 		return $token;

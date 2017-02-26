@@ -82,7 +82,7 @@ $app->post('/transac', function ($request, $response, $args) {
 	try {
 		
 		//set uuid		
-		$data['transac']['uuid'] = uniqid();
+		$data['transac']['uuid'] = strtoupper( uniqid() );
 		
 		//insert into transactions table
 		$arrFields = array_keys($data['transac']);
