@@ -93,7 +93,7 @@ class NotificationUtil {
 		
 		//Generate email verification
 		$isSSL = empty($_SERVER['HTTPS']) ? 'http' : 'https';
-		$strEmailVerifiy = $isSSL . '://' . $_SERVER['HTTP_HOST'] . '/user/verify/email?email=dGVzdEB0ZXN0LmNvbQ==&hash=c4ca4238a0b923820dcc509a6f75849b';
+		$strEmailVerifiy = $isSSL . '://' . $_SERVER['HTTP_HOST'] . '/user/verify/email?email='.base64_encode($data['email']).'&hash='.md5($data['email']);
 		$this->mail->Body = str_replace('[VERIFY_URL]', $strEmailVerifiy, $this->mail->Body);
 
 		//Replace the plain text body with one created manually
@@ -114,6 +114,10 @@ class NotificationUtil {
 	//send notification new order reciept
 	public function emailOrderStatus ($data) {
 
+		$this->mail->ClearAddresses();  // each AddAddress add to list
+		$this->mail->ClearCCs();
+		$this->mail->ClearBCCs();
+		
 		//status config
 		$arrStatusOrder = (array)$this->manifest->status_order;
 		
@@ -132,7 +136,7 @@ class NotificationUtil {
 					$arrItemAddOns = json_decode($arrItem['add_ons'], true);
 					
 				foreach ($arrItemAddOns as $arrAddOns) {
-					$strAddOns .= $arrAddOns['name'] . ' - ' . $arrAddOns['price'] . '  x ' . $arrAddOns['qty'] . '<br>';			    
+					$strAddOns .= @$arrAddOns['add_on_name'] . ' - ' . $arrAddOns['price'] . '  x ' . $arrAddOns['qty'] . '<br>';			    
 				}
 			}
 			
@@ -174,6 +178,7 @@ EOT;
 		$this->mail->Body = str_replace('[TRANSAC_DISCOUNT]', number_format($data['transac']['discount'],2), $this->mail->Body);
 		$this->mail->Body = str_replace('[TRANSAC_DELIVERY_COST]', number_format($data['transac']['delivery_cost'],2), $this->mail->Body);
 		$this->mail->Body = str_replace('[TRANSAC_TOTAL_AMOUNT]', number_format($data['transac']['total_amount'],2), $this->mail->Body);
+		$this->mail->Body = str_replace('[CURRENCY]', $arrResult['currency'], $this->mail->Body);
 		
 		//Set who the message is to be sent to
 		$this->mail->addAddress($this->jwtToken->user->email, $this->jwtToken->user->first_name);
@@ -210,6 +215,10 @@ EOT;
 	//send notification new order reciept
 	public function emailOrderStatusVendor ($data) {
 	
+		$this->mail->ClearAddresses();  // each AddAddress add to list
+		$this->mail->ClearCCs();
+		$this->mail->ClearBCCs();		
+		
 		//status config
 		$arrStatusOrder = (array)$this->manifest->status_order;
 	
@@ -228,7 +237,7 @@ EOT;
 					$arrItemAddOns = json_decode($arrItem['add_ons'], true);
 					
 				foreach ($arrItemAddOns as $arrAddOns) {
-					$strAddOns .= $arrAddOns['name'] . ' - ' . $arrAddOns['price'] . '  x ' . $arrAddOns['qty'] . '<br>';
+					$strAddOns .= @$arrAddOns['add_on_name'] . ' - ' . $arrAddOns['price'] . '  x ' . $arrAddOns['qty'] . '<br>';
 				}
 			}
 				
@@ -273,7 +282,7 @@ EOT;
 
 		//Set who the message is to be sent to
 		//$this->mail->addAddress($strVendorEmail, $strVendorEmail);
-		$this->mail->addAddress('d0ngix.mabulay@gmail.com', $strVendorEmail);
+		$this->mail->addAddress($strVendorEmail, $strVendorName);
 
 		//setup proper email subject
 		$strSubject = "[Order Status Update]";

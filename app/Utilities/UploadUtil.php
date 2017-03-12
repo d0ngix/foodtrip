@@ -6,11 +6,19 @@ class UploadUtil
 {
 	public $db = null;
 
+	public $jwt = null;
+	
 	public $imgPath = 'public/img/';
 
-	public function __construct( $db = null ) {
+	public function __construct( $db = null, $jwtToken, $manifest ) {
+	
+		$this->db = $db;
+		$this->jwtToken = $jwtToken;
+		$this->manifest = $manifest;
 
 		$this->db = $db;
+		
+		//$this->jwt = $jwt;
 
 	}
 
@@ -48,21 +56,14 @@ class UploadUtil
 	private function UserPhoto ($requestData) {
 
 		$this->imgPath = $this->imgPath . "user/";
-
-		$objUserUtil = new \Utilities\UserUtil($this->db);
-		$userId = $objUserUtil->checkUser($requestData['user_uuid']);
-		if ( ! $userId ) {
-			$response->withJson(array("status" => false, "message" =>"Invalid User!"), 404);
-			return $response;
-		}
-
+		
 		$storage = new \Upload\Storage\FileSystem($this->imgPath);
 		$file = new \Upload\File('photo', $storage);
 
 		// Optionally you can rename the file on upload
-		$new_filename = $requestData['user_uuid'];
+		$new_filename = $this->jwtToken->user->uuid;//$requestData['user_uuid'];
 		$file->setName($new_filename);
-
+		
 		// Validate file upload
 		// MimeType List => http://www.iana.org/assignments/media-types/media-types.xhtml
 		$file->addValidations(array(
@@ -93,7 +94,7 @@ class UploadUtil
 			// INSERT INTO users ( id , usr , pwd ) VALUES ( ? , ? , ? )
 			$updataeStatement = $this->db->update( array('photo' => json_encode($data)) )
 										->table('users')
-										->where('id', '=', $userId);
+										->where('uuid', '=', $this->jwtToken->user->uuid);
 			$updateId = $updataeStatement->execute(true);
 
 		} catch (Exception $e) {
@@ -102,9 +103,9 @@ class UploadUtil
 
 		}
 
-		$filePath = $this->imgPath . $requestData['user_uuid'] . "." . $file->getExtension();
-		if(file_exists($filePath))
-			unlink($filePath);
+ 		$filePath = $this->imgPath . $this->jwtToken->user->uuid . "." . $file->getExtension();
+ 		if(file_exists($filePath))
+ 			unlink($filePath);
 
 		return $file;
 

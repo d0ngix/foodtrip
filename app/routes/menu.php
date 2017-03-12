@@ -145,7 +145,7 @@ $app->post('/menu/rate/{menu_id}', function($request, $response, $args){
 	$selectStmt = $selectStmt->execute();
 	$arrResult = $selectStmt->fetchAll();
 	if ( ! $arrResult ) {
-		return $response->withJson(array("status" => false, "message" => "No Record(s) Found!"),404);
+		return $response->withJson(array("status" => false, "message" => "You have yet to buy this menu!"),404);
 	}	
 			
 	//set rating

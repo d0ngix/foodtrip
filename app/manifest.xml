@@ -27,10 +27,10 @@
 		<Debugoutput>html</Debugoutput>
 		
 		<!-- Set the hostname of the mail server -->
-		<Host>smtp.gmail.com</Host>;
+		<Host>in-v3.mailjet.com</Host>;
 		
 		<!-- Set the SMTP port number - likely to be 25, 465 or 587 -->
-		<Port>587</Port>
+		<Port>25</Port>
 		
 		<!-- Whether to use SMTP authentication -->
 		<SMTPAuth>true</SMTPAuth>
@@ -40,31 +40,30 @@
 		
 		<account>
 			<!-- Username to use for SMTP authentication -->
-			<Username>d0ngix.mabulay@gmail.com</Username>
+			<Username>a890d0ddb7b61fc6fe2f5b424a816ade</Username>
 			
 			<!-- Password to use for SMTP authentication -->
-			<Password>!iskoy777!++</Password>			
+			<Password>a4d001029b72944dbad82fcb2f2ed38e</Password>			
 		</account>
 		
 		<!-- Set who the message is to be sent from -->
 		<setFrom>
-			<email>d0ngix.mabulay@gmail.com</email>
+			<email>jmbrothers@gmail.com</email>
 			<name>FoodTri.PH</name>
 		</setFrom>
 		
 		<!-- Set an alternative reply-to address -->
 		<addReplyTo>
-			<email>d0ngix.mabulay@gmail.com</email>
+			<email>jmbrothers@gmail.com</email>
 			<name>FoodTri.PH</name>		
 		</addReplyTo>				
 	</smtp>
 	<status_order>
 		<status_0>Cancelled</status_0>
-		<status_1>Pending - Awating for Order Acceptance</status_1>
-		<status_2>Order Accepted - Awaiting Payment</status_2>
+		<status_1>Pending - Awaiting Acknowledgement</status_1>
+		<status_2>Accepted</status_2>
 		<status_3>Paid</status_3>
 		<status_4>Preparing</status_4>
-		<status_5>Dispatched - Delivery on the way</status_5>
-		<status_6>Delivered - Order Complete</status_6>
+		<status_5>Delivered - Order Complete</status_5>
 	</status_order>
 </config>

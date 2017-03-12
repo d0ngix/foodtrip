@@ -215,18 +215,20 @@ $app->get('/transac/orders/all[/{status}]', function($request, $response, $args)
 			$arrResult = $this->MenuUtil->getMenuImages($arrResult);
 		
 			//make transaction_id as the key
-			$arrResultNew = [];
-			foreach ($arrResult as $v)
-				$arrResultNew[$v['transaction_id']][] = $v; 	
-		
-			$arrResult = $arrResultNew;
+			if (!empty($arrResult)) {
+				$arrResultNew = [];
+				foreach ($arrResult as $v)
+					$arrResultNew[$v['transaction_id']][] = $v;
+				
+				$arrResult = $arrResultNew;
+			} 	
 		}
 		
 		//set the items of each transactions
 		$arrTransacNew = [];
 		foreach ($arrTransac as $v) {
 			$vNew = [];
-			$v['items'] = empty($arrResult[$v['id']]) ? "" : $arrResult[$v['id']]; 
+			$v['items'] = empty($arrResult[$v['id']]) ? null : $arrResult[$v['id']]; 
 
 			//json_decode add-ons
 			if (!empty($v['items'])) {

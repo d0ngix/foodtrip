@@ -4,7 +4,7 @@ class UserUtil
 {
 	public $db = null;
 	
-	public function __construct( $db = null , $jwt ) {
+	public function __construct( $db = null , $jwt = null) {
 		
 		$this->db = $db;
 		$this->jwt = $jwt;

@@ -137,7 +137,9 @@ $container['UserUtil'] = function ($c) {
 //Inject User Upload Class
 use Utilities\UploadUtil;
 $container['UploadUtil'] = function ($c) {
-	$objUtil = new UploadUtil($c->db );
+	//$objUtil = new UploadUtil($c->db, $c->jwt );
+	if (empty($c->jwtToken)) $c->jwtToken = null;
+	$objUtil = new UploadUtil($c->db, $c->jwtToken, $c->manifest);
 	return $objUtil;
 };
 

@@ -233,7 +233,7 @@ $app->get('/user/verify/email', function ($request, $response, $args){
 	try {
 		
 		//Get the user details based on email and the hash
-		$selectStmt = $this->db->select()->from('users')->whereMany($data,'=');
+		$selectStmt = $this->db->select()->from('users')->where('email', '=', $data['email']);
 		$selectStmt = $selectStmt->execute();
 		$arrResult = $selectStmt->fetch();
 		
@@ -282,10 +282,10 @@ $app->post('/user/password/reset', function($request, $response, $args){
 		$stmt = $selectUserStatement->execute(false);
 		$dataUser = $stmt->fetch();
 		
+		if(!$dataUser) return $response->withJson(array('status'=>false, "message"=> "User Could Not Be Found!"), 404);
+
 		$strPassword = $this->UserUtil->generatePassword();
 		$dataUser['password'] = password_hash($strPassword, PASSWORD_BCRYPT, ['cost' => 12]);
-		
-		if(!$dataUser) return $response->withJson(array('status'=>false, "message"=> "User Could Not Be Found!"), 404);
 		
 		$updateStatement = $this->db->update( $dataUser )
 									->table('users')
