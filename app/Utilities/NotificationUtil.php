@@ -78,7 +78,12 @@ class NotificationUtil {
 
 		//Set who the message is to be sent to
 		$this->mail->addAddress($data['email'], "$data[first_name] @$data[last_name]");
-		//$this->mail->addAddress("jmbrothers@gmail.com", "$data[first_name] @$data[last_name]");
+		
+		//Set who the message is to be sent from
+		$this->mail->setFrom('no-reply@foodtri.ph',	'FoodTri.PH');
+		
+		//Set an alternative reply-to address
+		$this->mail->addReplyTo('no-reply@foodtri.ph',	'FoodTri.PH');
 		
 		//Set the subject line
 		$this->mail->Subject = '['.$this->manifest->company->name.'] Email Verification';
@@ -92,8 +97,8 @@ class NotificationUtil {
 		$this->mail->Body = str_replace('[USER_FIRSTNAME]', ucfirst($data['first_name']), $this->mail->Body);						
 		
 		//Generate email verification
-		$isSSL = empty($_SERVER['HTTPS']) ? 'http' : 'https';
-		$strEmailVerifiy = $isSSL . '://' . $_SERVER['HTTP_HOST'] . '/user/verify/email?email='.base64_encode($data['email']).'&hash='.md5($data['email']);
+		$strEmailVerifiy = $this->manifest->admin_url . '/users/verify/'.base64_encode($data['email']).'/'.md5($data['email']);		
+		
 		$this->mail->Body = str_replace('[VERIFY_URL]', $strEmailVerifiy, $this->mail->Body);
 
 		//Replace the plain text body with one created manually
@@ -158,7 +163,7 @@ EOT;
 		}
 		
 		//Retrieve vendor name
-		$selectStmt = $this->db->select(array('name'))->from('vendors')->where('id','=',$data['transac']['vendor_id']);
+		$selectStmt = $this->db->select(['name','currency'])->from('vendors')->where('id','=',$data['transac']['vendor_id']);
 		$arrResult = $selectStmt->execute()->fetch();
 		$strVendorName = $arrResult['name'];
 		
@@ -179,10 +184,16 @@ EOT;
 		$this->mail->Body = str_replace('[TRANSAC_DELIVERY_COST]', number_format($data['transac']['delivery_cost'],2), $this->mail->Body);
 		$this->mail->Body = str_replace('[TRANSAC_TOTAL_AMOUNT]', number_format($data['transac']['total_amount'],2), $this->mail->Body);
 		$this->mail->Body = str_replace('[CURRENCY]', $arrResult['currency'], $this->mail->Body);
+		$this->mail->Body = str_replace('[ADMIN_URL]', "", $this->mail->Body);
 		
 		//Set who the message is to be sent to
 		$this->mail->addAddress($this->jwtToken->user->email, $this->jwtToken->user->first_name);
-		//$this->mail->addAddress('jmbrothers@gmail.com', $this->jwtToken->user->first_name);
+
+		//Set who the message is to be sent from
+		$this->mail->setFrom('no-reply@foodtri.ph',	'FoodTri.PH');
+		
+		//Set an alternative reply-to address
+		$this->mail->addReplyTo('no-reply@foodtri.ph',	'FoodTri.PH');		
 		
 		//setup proper email subject 
 		$strSubject = "Order Status Update";
@@ -259,7 +270,7 @@ EOT;
 		}
 	
 		//Retrieve vendor name
-		$selectStmt = $this->db->select(array('name','email'))->from('vendors')->where('id','=',$data['transac']['vendor_id']);
+		$selectStmt = $this->db->select(array('name','email','currency'))->from('vendors')->where('id','=',$data['transac']['vendor_id']);
 		$arrResult = $selectStmt->execute()->fetch();
 		$strVendorName = $arrResult['name'];
 		$strVendorEmail = $arrResult['email'];
@@ -278,7 +289,8 @@ EOT;
 		$this->mail->Body = str_replace('[TRANSAC_DISCOUNT]', number_format($data['transac']['discount'], 2), $this->mail->Body);
 		$this->mail->Body = str_replace('[TRANSAC_DELIVERY_COST]', number_format($data['transac']['delivery_cost'], 2), $this->mail->Body);
 		$this->mail->Body = str_replace('[TRANSAC_TOTAL_AMOUNT]', number_format($data['transac']['total_amount'], 2), $this->mail->Body);
-
+		$this->mail->Body = str_replace('[CURRENCY]', $arrResult['currency'], $this->mail->Body);
+		$this->mail->Body = str_replace('[ADMIN_URL]', '<span>Please login to <a href"'.$this->manifest->admin_url.'">FoodTri.PH</a> to see more details</span>', $this->mail->Body);
 
 		//Set who the message is to be sent to
 		//$this->mail->addAddress($strVendorEmail, $strVendorEmail);
@@ -319,7 +331,12 @@ EOT;
 
 		//Set who the message is to be sent to
 		$this->mail->addAddress($data['email'], "$data[first_name] @$data[last_name]");
-		//$this->mail->addAddress("jmbrothers@gmail.com", "$data[first_name] @$data[last_name]");
+
+		//Set who the message is to be sent from
+		$this->mail->setFrom('no-reply@foodtri.ph',	'FoodTri.PH');
+		
+		//Set an alternative reply-to address
+		$this->mail->addReplyTo('infono-replyfoodtri.ph',	'FoodTri.PH');		
 		
 		//Set the subject line
 		$this->mail->Subject = '['.$this->manifest->company->name.'] Reset Password';

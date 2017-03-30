@@ -23,16 +23,18 @@ class TransacUtil {
 		$arrDataMenu = $selectStmt->fetchAll();
 		
 		if (!empty($arrDataMenu)) {
-			foreach ($arrDataMenu as $value) $arrNewData[$value['id']] = $value;
+			foreach ($arrDataMenu as $key => $value) {
+				$value['price'] = (float)$value['price'];				
+				$arrNewData[$value['id']] = $value;
+			}
 			$arrDataMenu = $arrNewData;
 		}		
 
-		
 		foreach ( $data as $value ) {
 			//var_dump($value);
-			if ( abs($value['price']) !== abs($arrDataMenu[$value['menu_id']]['price']) ) 
+			if ( abs((float)$value['price']) !== abs($arrDataMenu[$value['menu_id']]['price']) ) 
 				return false;
-		}
+		}		
 		
 		return true;
 	}

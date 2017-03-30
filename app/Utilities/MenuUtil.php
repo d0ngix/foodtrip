@@ -20,28 +20,33 @@ class MenuUtil
 				$id[] = $value['id'];
 		}
 
-		$selectStatement = $this->db->select(array("menu_id","path", "is_primary", "name"))->from('menu_images')->whereIn('menu_id', $id);
+		$selectStatement = $this->db->select(array("photo","id"))->from('menus')->whereIn('id', $id);
 		$stmt = $selectStatement->execute(false);
 		$dataImage = $stmt->fetchAll();
 
 		if (!empty($dataImage)) {
 			foreach ($dataImage as $value) {
-				$newDateImage[$value['menu_id']][] = $value;
+				$arrPhoto = json_decode($value['photo'], true);
+				//$newDateImage[$value['id']] = '/' . $arrPhoto['path'] . '/' . $arrPhoto['name'];
+				$newDateImage[$value['id']] = $arrPhoto;
 			}
-			$dataImage = $newDateImage;
-				
-			//var_dump($dataImage);die;
-			$counter = 0;
+ 			$dataImage = $newDateImage;
+
+ 			$counter = 0;
+
 			foreach ($data as $value) {
 				$newData[$counter] = $value;
-				if (!empty($dataImage[$value['id']]))
-					$newData[$counter]['photo'] = $dataImage[$value['id']];
 
+				if (!empty($value['menu_id'])) {
+					if (!empty($dataImage[$value['menu_id']]))
+						$newData[$counter]['photo'] = $dataImage[$value['menu_id']];
+				}
+				
 				$counter++;
 			}
+			
 			return $newData;
 		}
-
 		return false;
 	}
 

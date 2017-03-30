@@ -81,6 +81,10 @@ $app->post('/transac', function ($request, $response, $args) {
 	
 	try {
 		
+		//get vendor currency
+		$strCurrency = $this->db->select(['currency'])->from('vendors')->where('id','=',$data['transac']['vendor_id'])->execute(false)->fetch();
+		$data['transac']['currency'] = $strCurrency['currency'];
+		
 		//set uuid		
 		$data['transac']['uuid'] = strtoupper( uniqid() );
 		
@@ -91,7 +95,7 @@ $app->post('/transac', function ($request, $response, $args) {
 								->into('transactions')
 								->values($arrValues);
 		$intTransacId = $insertStatement->execute(true);
-		$strUuid = $this->db->select(array('uuid'))->from('transactions')->where('id','=',$intTransacId)->execute(false)->fetch();
+		$strUuid = $this->db->select(['uuid'])->from('transactions')->where('id','=',$intTransacId)->execute(false)->fetch();
 		
 		//insert into transaction_items
 		foreach ( $data['items'] as $value ) {

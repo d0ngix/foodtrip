@@ -7,6 +7,7 @@
 	<errors>
 		<err_404>Record Could Not Be Found!</err_404>
 	</errors>
+	<api_version>v1</api_version>
 	<smtp>
 		<!-- Set character encoding -->
 		<CharSet>UTF-8</CharSet>		
@@ -30,7 +31,7 @@
 		<Host>in-v3.mailjet.com</Host>;
 		
 		<!-- Set the SMTP port number - likely to be 25, 465 or 587 -->
-		<Port>25</Port>
+		<Port>2525</Port>
 		
 		<!-- Whether to use SMTP authentication -->
 		<SMTPAuth>true</SMTPAuth>
@@ -40,21 +41,21 @@
 		
 		<account>
 			<!-- Username to use for SMTP authentication -->
-			<Username>a890d0ddb7b61fc6fe2f5b424a816ade</Username>
+			<Username>6087caa7bbdfb8226021809035e6cf27</Username>
 			
 			<!-- Password to use for SMTP authentication -->
-			<Password>a4d001029b72944dbad82fcb2f2ed38e</Password>			
+			<Password>9f68ec3c33d8acfb55952107e5637032</Password>			
 		</account>
 		
 		<!-- Set who the message is to be sent from -->
 		<setFrom>
-			<email>jmbrothers@gmail.com</email>
+			<email>no-reply@foodtri.ph</email>
 			<name>FoodTri.PH</name>
 		</setFrom>
 		
 		<!-- Set an alternative reply-to address -->
 		<addReplyTo>
-			<email>jmbrothers@gmail.com</email>
+			<email>no-reply@foodtri.ph</email>
 			<name>FoodTri.PH</name>		
 		</addReplyTo>				
 	</smtp>
@@ -66,4 +67,7 @@
 		<status_4>Preparing</status_4>
 		<status_5>Delivered - Order Complete</status_5>
 	</status_order>
+	
+	<admin_url>http://my-foodtriph.ddns.net</admin_url>
+	
 </config>

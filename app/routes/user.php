@@ -240,7 +240,7 @@ $app->get('/user/verify/email', function ($request, $response, $args){
 		if (empty($arrResult)) 
 			return $response->withJson(array('status'=>false, "message"=> "User Could Not Be Found!"), 404);
 		elseif ($arrResult['verified'])
-			return $response->withJson(array('status'=>false, "message"=> "We already know your not a spammer."), 200);
+			return $response->withJson(array('status'=>false, "message"=> "We already know your not a robot."), 200);
 		
 		$arrVerificationDetails = [
 			'date_time' => date('c'),
