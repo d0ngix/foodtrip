@@ -49,12 +49,27 @@ class UserUtil
 		$future = new \DateTime("now +7 days");
 		$server = $_SERVER;
 		
+// 		$payload = [
+// 			"iat" => $now->getTimeStamp(),
+// 			"exp" => $future->getTimeStamp(),
+// 			"user" => $data
+// 			//"sub" => $server["PHP_AUTH_USER"],
+// 		];
+
+		$arrUserPayload = [
+			'uuid' => $data['uuid'],
+			'email' => $data['email'],
+			'first_name' => $data['first_name'],
+			'mobile' => $data['mobile'],
+			'verified' => $data['verified'],
+			'is_seller' => $data['is_seller']
+		];
 		$payload = [
 			"iat" => $now->getTimeStamp(),
 			"exp" => $future->getTimeStamp(),
-			"user" => $data
+			"user" => $arrUserPayload
 			//"sub" => $server["PHP_AUTH_USER"],
-		];
+		];		
 		
 		$secret = $_ENV['JWT_SECRET'];
 		$token = $this->jwt->encode($payload, $secret, "HS256");
@@ -90,11 +105,29 @@ class UserUtil
 		$stmt = $selectUserStatement->execute(false);
 		$dataUser = $stmt->fetch();
 		
-		if (!empty($dataUser['photo']))
-			$dataUser['photo'] = json_decode($dataUser['photo'], true);
+		if (!empty($dataUser['photo'])) {
+			$arrPhoto = json_decode($dataUser['photo'], true);
+			if (!empty($arrPhoto)) {
+				
+				if(isset($_SERVER['HTTPS'])) $protocol = ($_SERVER['HTTPS'] && $_SERVER['HTTPS'] != "off") ? "https" : "http";
+				else $protocol = 'http';
+
+				$dataUser['photo'] = $protocol . "://" . $_SERVER['HTTP_HOST'] . '/' . $arrPhoto['path'] . $arrPhoto['name'];
+			}
+			
+		}
 		
 		if (!empty($dataUser['password']))
 			unset($dataUser['password']);
+		
+		if ( !empty($dataUser['social_media']) )
+			$dataUser['social_media'] = json_decode($dataUser['social_media'], true);
+		
+		if ( !empty($dataUser['device_details']) )
+			$dataUser['device_details'] = json_decode($dataUser['device_details'], true);
+
+		if ( !empty($dataUser['verification_details']) )
+			$dataUser['verification_details'] = json_decode($dataUser['verification_details'], true);		
 		
 		//get user addresses
 		$selectStatement = $this->db->select()->from('addresses')->where('user_id','=',$dataUser['id']);
